@@ -27,6 +27,9 @@
   <modules>
     <module>org.eclipse.tracecompass.incubator.target</module>
     <module>org.eclipse.tracecompass.incubator.releng-site</module>
+    <module>org.eclipse.tracecompass.incubator.rcp</module>
+    <module>org.eclipse.tracecompass.incubator.rcp.ui</module>
+    <module>org.eclipse.tracecompass.incubator.rcp.product</module>
   </modules>
 
 </project>
