@@ -44,6 +44,11 @@
     <module>org.eclipse.tracecompass.incubator.tracecompass</module>
     <module>org.eclipse.tracecompass.incubator.tracecompass.core</module>
     <module>org.eclipse.tracecompass.incubator.tracecompass.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.android</module>
+    <module>org.eclipse.tracecompass.incubator.android.core</module>
+    <module>org.eclipse.tracecompass.incubator.android.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.android.ui</module>
+    <module>org.eclipse.tracecompass.incubator.android.doc.user</module>
     <!-- insert modules here -->
   </modules>
 
