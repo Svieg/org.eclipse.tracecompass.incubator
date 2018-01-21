@@ -10,6 +10,6 @@
 			<attribute name="annotationpath" value="/org.eclipse.tracecompass.incubator.annotations/annotations"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="/" kind="src" path="src"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
