@@ -96,6 +96,7 @@ public class AndroidEvent extends TmfEvent implements ITmfSourceLookup {
     public static AndroidField parseJson(String fieldsString) {
         // looks like this
         // {"ts":94824347413117,"phase":"B","tid":39,"name":"TimeGraphView:BuildThread","args"={"trace":"django-httpd"}}
+        // TODO: Parse one event into a AndroidField.
         JSONObject root;
         Map<@NonNull String, @NonNull Object> argsMap = new HashMap<>();
         try {
@@ -111,7 +112,7 @@ public class AndroidEvent extends TmfEvent implements ITmfSourceLookup {
                 // FIXME: Easy way to avoid null warning
                 phase = "I"; //$NON-NLS-1$
             }
-            String name = String.valueOf(optString(root,IAndroidConstants.NAME, "E".equals(phase) ? "exit" : "unknown")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            String name = String.valueOf(optString(root, IAndroidConstants.NAME, "E".equals(phase) ? "exit" : "unknown")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             Integer tid = optInt(root, IAndroidConstants.TID);
             if (tid == Integer.MIN_VALUE) {
                 tid = null;
@@ -165,7 +166,7 @@ public class AndroidEvent extends TmfEvent implements ITmfSourceLookup {
         return root.has(key) ? root.optInt(key) : Integer.MIN_VALUE;
     }
 
-    private static JSONObject optJSONObject(JSONObject root, String key){
+    private static JSONObject optJSONObject(JSONObject root, String key) {
         return root.has(key) ? root.optJSONObject(key) : null;
     }
 

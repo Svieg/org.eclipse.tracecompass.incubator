@@ -42,6 +42,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
  * @authors Guillaume Champagne, Alexis-Maurer Fortin, Hugo Genesse, Pierre-Yves
  *          Lajoie, Eva Terriault
  */
+// TODO: Sort file and write result in a new one, is it needed for ftrace?
 final class SortingJob extends Job {
 
     private static final int CHARS_PER_LINE_ESTIMATE = 50;

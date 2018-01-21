@@ -21,6 +21,7 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
  */
 public class AndroidLookup {
 
+    // TODO: Define Android list of event types.
     private static final ITmfEventType[] TYPES = new TmfEventType[256];
     static {
         TYPES['B'] = new TmfEventType("Entry", null); //$NON-NLS-1$

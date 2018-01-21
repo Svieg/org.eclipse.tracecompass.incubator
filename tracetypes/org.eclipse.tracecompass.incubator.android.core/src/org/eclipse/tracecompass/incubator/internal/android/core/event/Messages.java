@@ -17,6 +17,7 @@ import org.eclipse.osgi.util.NLS;
  * @authors Guillaume Champagne, Alexis-Maurer Fortin, Hugo Genesse, Pierre-Yves
  *          Lajoie, Eva Terriault
  */
+// TODO: Define Android specific messages.
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.android.core.event.messages"; //$NON-NLS-1$
     /**

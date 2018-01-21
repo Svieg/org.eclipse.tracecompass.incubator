@@ -28,6 +28,8 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 @NonNullByDefault
 public class AndroidField {
 
+    // TODO: Define what is included in a Android Field.
+    // TODO: Adapte constructor and getters.
     private final long fTs;
     private final char fPhase;
     private final String fName;

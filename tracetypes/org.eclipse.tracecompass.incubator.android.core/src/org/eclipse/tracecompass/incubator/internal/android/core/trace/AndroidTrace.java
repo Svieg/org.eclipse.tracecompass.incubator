@@ -45,7 +45,7 @@ import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 
 /**
- * Trace event trace. Can read trace event unsorted or sorted JSON traces.
+ * Android trace. Can read Android unsorted or sorted JSON traces.
  *
  * @authors Guillaume Champagne, Alexis-Maurer Fortin, Hugo Genesse, Pierre-Yves
  *          Lajoie, Eva Terriault
@@ -64,6 +64,7 @@ public class AndroidTrace extends TmfTrace implements ITmfPersistentlyIndexable,
 
     private RandomAccessFile fFileInput;
 
+    // TODO: Determine if the trace format is valid.
     @Override
     public IStatus validate(IProject project, String path) {
         File file = new File(path);
@@ -109,6 +110,7 @@ public class AndroidTrace extends TmfTrace implements ITmfPersistentlyIndexable,
         return new TraceValidationStatus(confidence, Activator.PLUGIN_ID);
     }
 
+    // TODO: Does the trace need to be sorted?
     @Override
     public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
         super.initTrace(resource, path, type);
@@ -151,7 +153,7 @@ public class AndroidTrace extends TmfTrace implements ITmfPersistentlyIndexable,
     public double getLocationRatio(ITmfLocation location) {
         return ((Long) getCurrentLocation().getLocationInfo()).doubleValue() / fFile.length();
     }
-
+    // TODO: Go to a position in the trace based on the location and create a context
     @Override
     public ITmfContext seekEvent(ITmfLocation location) {
         if (fFile == null) {
@@ -179,6 +181,7 @@ public class AndroidTrace extends TmfTrace implements ITmfPersistentlyIndexable,
         }
     }
 
+    // TODO: Go to a position in the trace based on the ratio and create a context
     @Override
     public ITmfContext seekEvent(double ratio) {
         File file = fFile;
@@ -194,7 +197,7 @@ public class AndroidTrace extends TmfTrace implements ITmfPersistentlyIndexable,
     public Iterable<@NonNull ITmfEventAspect<?>> getEventAspects() {
         return AndroidAspects.getAspects();
     }
-
+    // TODO: Read file and call the parsing.
     @Override
     public ITmfEvent parseEvent(ITmfContext context) {
         @Nullable
@@ -275,6 +278,7 @@ public class AndroidTrace extends TmfTrace implements ITmfPersistentlyIndexable,
      * @throws IOException
      *             end of file, file not found or such
      */
+    // TODO: Do we need to do this?
     public static @Nullable String readNextEventString(IReaderWrapper parser) throws IOException {
         StringBuffer sb = new StringBuffer();
         int scope = -1;

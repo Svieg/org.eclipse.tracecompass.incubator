@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @authors Guillaume Champagne, Alexis-Maurer Fortin, Hugo Genesse, Pierre-Yves
  *          Lajoie, Eva Terriault
  */
+// TODO: Define Android trace field names.
 @NonNullByDefault
 public interface IAndroidConstants {
 
