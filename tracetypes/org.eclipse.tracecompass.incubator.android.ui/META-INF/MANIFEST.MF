@@ -11,5 +11,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.tracecompass.common.core,
- org.eclipse.tracecompass.incubator.android.core
+ org.eclipse.tracecompass.incubator.android.core,
+ org.eclipse.tracecompass.tmf.core,
+ org.eclipse.tracecompass.tmf.ui
 Export-Package: org.eclipse.tracecompass.incubator.internal.android.ui;x-internal:=true
