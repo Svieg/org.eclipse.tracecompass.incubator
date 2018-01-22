@@ -3,6 +3,7 @@
 	<name>org.eclipse.tracecompass.incubator.ftrace.core</name>
 	<comment></comment>
 	<projects>
+		<project>org.eclipse.tracecompass.incubator.tracecompass.core</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
