@@ -43,8 +43,9 @@ public class FtraceParser {
                         Integer pid = Integer.parseInt(m.group("pid")); //$NON-NLS-1$
                         Integer cpu = Integer.parseInt(m.group("cpu")); //$NON-NLS-1$
                         Double timestamp = Double.parseDouble(m.group("timestamp")); //$NON-NLS-1$
-                        String data = m.group("data"); //$NON-NLS-1$
-                        System.out.println(comm + " " + pid + " " + cpu + " " + timestamp + " " + data); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+                        String function = m.group(6);
+                        String functionData = m.group("data"); //$NON-NLS-1$
+                        System.out.println(comm + " " + pid + " " + cpu + " " + timestamp + " " + function + " " + functionData); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
                     });
         } catch (IOException e) {
             e.printStackTrace();
