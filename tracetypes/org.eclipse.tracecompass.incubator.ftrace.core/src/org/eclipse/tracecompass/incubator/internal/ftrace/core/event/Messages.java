@@ -18,7 +18,7 @@ import org.eclipse.osgi.util.NLS;
  *          Lajoie, Eva Terriault
  */
 public class Messages extends NLS {
-    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.traceevent.core.event.messages"; //$NON-NLS-1$
+    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.ftrace.core.event.messages"; //$NON-NLS-1$
     /**
      * Arguments
      */
@@ -86,19 +86,19 @@ public class Messages extends NLS {
     /**
      * Duration
      */
-    public static String TraceEventAspects_Duration;
+    public static String FtraceAspects_Cpu;
     /**
      * Duration Description
      */
-    public static String TraceEventAspects_DurationD;
+    public static String FtraceAspects_CpuD;
     /**
      * Process Id
      */
-    public static String TraceEventAspects_Pid;
+    public static String FtraceAspects_Pid;
     /**
      * Process Id Description
      */
-    public static String TraceEventAspects_PidD;
+    public static String FtraceAspects_PidD;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

@@ -130,13 +130,13 @@ public class FtraceAspects {
 
         @Override
         public @NonNull String getName() {
-            return String.valueOf(Messages.TraceEventAspects_Pid);
+            return String.valueOf(Messages.FtraceAspects_Pid);
         }
 
         @Override
         public @NonNull String getHelpText() {
             return String.valueOf(
-                    Messages.TraceEventAspects_PidD);
+                    Messages.FtraceAspects_PidD);
         }
 
         @Override
