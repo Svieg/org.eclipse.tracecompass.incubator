@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.Activator;
@@ -37,7 +36,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTraceKnownSize;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.indexer.ITmfPersistentlyIndexable;
@@ -85,10 +83,10 @@ public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, 
         try (BufferedRandomAccessFile rafile = new BufferedRandomAccessFile(path, "r")) { //$NON-NLS-1$
             int lineCount = 0;
             int matches = 0;
-            String line = readNextEventString(() -> (char) rafile.read());
+            String line = rafile.readLine();
             while ((line != null) && (lineCount++ < MAX_LINES)) {
                 try {
-                    FtraceField field = FtraceEvent.parseJson(line);
+                    FtraceField field = FtraceEvent.parseLine(line);
                     if (field != null) {
                         matches++;
                     }
@@ -97,7 +95,7 @@ public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, 
                 }
 
                 confidence = MAX_CONFIDENCE * matches / lineCount;
-                line = readNextEventString(() -> (char) rafile.read());
+                line = rafile.readLine();
             }
             if (matches == 0) {
                 return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Most assuredly NOT a traceevent trace"); //$NON-NLS-1$
@@ -112,22 +110,8 @@ public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, 
     @Override
     public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
         super.initTrace(resource, path, type);
-        String dir = TmfTraceManager.getSupplementaryFileDir(this);
-        fFile = new File(dir + new File(path).getName());
-        if (!fFile.exists()) {
-            Job sortJob = new SortingJob(this, path);
-            sortJob.schedule();
-            try {
-                sortJob.join();
-            } catch (InterruptedException e) {
-                throw new TmfTraceException(e.getMessage(), e);
-            }
-            IStatus result = sortJob.getResult();
-            if (!result.isOK()) {
-                throw new TmfTraceException("Job failed " + result.getMessage()); //$NON-NLS-1$
-            }
-        }
         try {
+            fFile = new File(path);
             fFileInput = new BufferedRandomAccessFile(fFile, "r"); //$NON-NLS-1$
         } catch (IOException e) {
             throw new TmfTraceException(e.getMessage(), e);
@@ -163,7 +147,11 @@ public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, 
         }
         try {
             if (location == null) {
-                fFileInput.seek(1);
+                // TODO: guchaj: This doesn't work well.
+                String line = fFileInput.readLine();
+                while (line.charAt(0) == '#') {
+                    line = fFileInput.readLine();
+                }
             } else if (location.getLocationInfo() instanceof Long) {
                 fFileInput.seek((Long) location.getLocationInfo());
             }
@@ -213,7 +201,9 @@ public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, 
                     String nextLine = fFileInput.readLine();
                     if (nextLine != null) {
                         FtraceField field = FtraceEvent.parseLine(nextLine);
-                        return new FtraceEvent(this, context.getRank(), field);
+                        if (field != null) {
+                            return new FtraceEvent(this, context.getRank(), field);
+                        }
                     }
                 } catch (IOException e) {
                     Activator.getInstance().logError("Error parsing event", e); //$NON-NLS-1$
