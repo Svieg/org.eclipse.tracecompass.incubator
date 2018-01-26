@@ -38,7 +38,6 @@ import org.json.JSONObject;
 public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
 
     private static final Pattern FTRACE_PATTERN = Pattern.compile("^\\s*(?<comm>.*)-(?<pid>\\d+)(?:\\s+\\(.*\\))?\\s+\\[(?<cpu>\\d+)\\](?:\\s+....)?\\s+(?<timestamp>[0-9]+(?<us>\\.[0-9]+)?): (\\w+:\\s+)+(?<data>.+)"); //$NON-NLS-1$
-    private static final Pattern FTRACE_DATA_PATTERN = Pattern.compile("(?<name>[a-zA-Z_]+): ?(?<keyval>(.+=.+ ?)*)"); //$NON-NLS-1$
 
     private static final double MICRO_TO_NANO = 1000.0;
     private final @Nullable ITmfCallsite fCallsite;
@@ -107,25 +106,22 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
             Integer pid = Integer.parseInt(matcher.group("pid")); //$NON-NLS-1$
             Integer cpu = Integer.parseInt(matcher.group("cpu")); //$NON-NLS-1$
             Double timestamp = Double.parseDouble(matcher.group("timestamp")); //$NON-NLS-1$
-            String data = matcher.group("data"); //$NON-NLS-1$
 
-            Matcher dataMatcher = FTRACE_DATA_PATTERN.matcher(data);
-            if (dataMatcher.matches()) {
-                String name = dataMatcher.group("name"); //$NON-NLS-1$
-                String attributes = dataMatcher.group("keyval"); //$NON-NLS-1$
+            String name = matcher.group(6); //$NON-NLS-1$
+            name = name.substring(0, name.length() - 2);
+            String attributes = matcher.group("data"); //$NON-NLS-1$
 
-                Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
+            Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
 
-                // guchaj: Probably inefficient and not fail proof :-(
-                for (String keyval: attributes.split(" ")) { //$NON-NLS-1$
-                    String[] val = keyval.split("="); //$NON-NLS-1$
-                    if (val.length == 2) {
-                        fields.put(val[0], val[1]);
-                    }
+            // guchaj: Probably inefficient and not fail proof :-(
+            for (String keyval: attributes.split(" ")) { //$NON-NLS-1$
+                String[] val = keyval.split("="); //$NON-NLS-1$
+                if (val.length == 2) {
+                    fields.put(val[0], val[1]);
                 }
-
-                return new FtraceField(name, cpu, timestamp, pid, null, fields);
             }
+
+            return new FtraceField(name, cpu, timestamp, pid, null, fields);
         }
         return null;
     }
