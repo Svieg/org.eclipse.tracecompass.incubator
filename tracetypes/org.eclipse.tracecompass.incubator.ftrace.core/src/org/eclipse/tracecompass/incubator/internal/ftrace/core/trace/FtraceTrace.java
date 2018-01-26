@@ -21,8 +21,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.tracecompass.analysis.os.linux.core.trace.DefaultEventLayout;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
+import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceAspects;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceEvent;
@@ -49,7 +52,7 @@ import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
  *         Lajoie, Eva Terriault
  *
  */
-public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, ITmfPropertiesProvider, ITmfTraceKnownSize {
+public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, ITmfPropertiesProvider, ITmfTraceKnownSize, IKernelTrace {
 
     private static final int CHECKPOINT_SIZE = 10000;
     private static final int ESTIMATED_EVENT_SIZE = 90;
@@ -333,6 +336,11 @@ public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, 
             // swallow it for now
         }
         return length > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) length;
+    }
+
+    @Override
+    public IKernelAnalysisEventLayout getKernelEventLayout() {
+        return DefaultEventLayout.getInstance();
     }
 
 }

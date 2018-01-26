@@ -104,6 +104,7 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
         Matcher matcher = FTRACE_PATTERN.matcher(line); // guchaj: could this be a static object?
         if (matcher.matches()) {
             Integer pid = Integer.parseInt(matcher.group("pid")); //$NON-NLS-1$
+            Integer tid = pid;
             Integer cpu = Integer.parseInt(matcher.group("cpu")); //$NON-NLS-1$
             Double timestamp = Double.parseDouble(matcher.group("timestamp")); //$NON-NLS-1$
 
@@ -113,6 +114,11 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
 
             Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
 
+            fields.put(IFtraceConstants.TIMESTAMP, timestamp);
+            fields.put(IFtraceConstants.NAME, name);
+            fields.put(IFtraceConstants.TID, Integer.valueOf(tid).longValue());
+            fields.put(IFtraceConstants.PID, Integer.valueOf(pid).longValue());
+
             // guchaj: Probably inefficient and not fail proof :-(
             for (String keyval: attributes.split(" ")) { //$NON-NLS-1$
                 String[] val = keyval.split("="); //$NON-NLS-1$
@@ -121,7 +127,7 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
                 }
             }
 
-            return new FtraceField(name, cpu, timestamp, pid, null, fields);
+            return new FtraceField(name, cpu, timestamp, pid, tid, fields);
         }
         return null;
     }
