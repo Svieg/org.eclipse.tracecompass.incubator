@@ -28,15 +28,12 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 @NonNullByDefault
 public class FtraceField {
 
-    private final long fTs;
-    private final char fPhase;
+    private final Long fTs;
     private final String fName;
+    private final Integer fCpu;
     private ITmfEventField fContent;
     private final @Nullable Map<String, Object> fArgs;
     private final @Nullable Integer fTid;
-    private final @Nullable String fCategory;
-    private final @Nullable String fId;
-    private final @Nullable Long fDuration;
     private final @Nullable Object fPid;
 
     /**
@@ -44,36 +41,27 @@ public class FtraceField {
      *
      * @param name
      *            event name
+     * @param cpu
+     *            the cpu number
      * @param ts
      *            the timestamp in ns
-     * @param phase
-     *            the phase of the event
      * @param pid
      *            the process id
      * @param tid
      *            the threadId
-     * @param category
-     *            the category
-     * @param id
-     *            the ID of the event stream
-     * @param duration
-     *            the duration in ns
      * @param fields
      *            event fields (arguments)
      */
-    public FtraceField(String name, long ts, String phase, @Nullable Object pid, @Nullable Integer tid, @Nullable String category, @Nullable String id, @Nullable Double duration, Map<String, Object> fields) {
+    public FtraceField(String name, Integer cpu, Double ts, @Nullable Object pid, @Nullable Integer tid, Map<String, Object> fields) {
         fName = name;
+        fCpu = cpu;
         fPid = pid;
         fTid = tid;
-        fCategory = category;
-        fId = id;
         ITmfEventField[] array = fields.entrySet().stream()
                 .map(entry -> new TmfEventField(entry.getKey(), entry.getValue(), null))
                 .toArray(ITmfEventField[]::new);
         fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, fields, array);
-        fTs = ts;
-        fDuration = duration == null ? null : Double.isFinite(duration) ? duration.longValue() : null;
-        fPhase = phase.charAt(0);
+        fTs = Double.valueOf(ts * 1000000000).longValue();
         @SuppressWarnings("null")
         Map<@NonNull String, @NonNull Object> args = fields.entrySet().stream()
                 .filter(entry -> {
@@ -81,16 +69,6 @@ public class FtraceField {
                 })
                 .collect(Collectors.toMap(entry -> entry.getKey().substring(4), Entry::getValue));
         fArgs = args.isEmpty() ? null : args;
-
-    }
-
-    /**
-     * Get the event category
-     *
-     * @return the event category
-     */
-    public @Nullable String getCategory() {
-        return fCategory;
     }
 
     /**
@@ -103,30 +81,12 @@ public class FtraceField {
     }
 
     /**
-     * Get the event ID
-     *
-     * @return the event ID
-     */
-    public @Nullable String getId() {
-        return fId;
-    }
-
-    /**
      * Get the name of the event
      *
      * @return the event name
      */
     public String getName() {
         return fName;
-    }
-
-    /**
-     * Get the phase of the event
-     *
-     * @return the event phase
-     */
-    public char getPhase() {
-        return fPhase;
     }
 
     /**
@@ -143,18 +103,8 @@ public class FtraceField {
      *
      * @return the timestamp in ns
      */
-    public long getTs() {
+    public Long getTs() {
         return fTs;
-    }
-
-    /**
-     * Get the event duration if applicable
-     *
-     * @return the duration or null in ns
-     */
-    @Nullable
-    public Long getDuration() {
-        return fDuration;
     }
 
     /**
@@ -175,5 +125,13 @@ public class FtraceField {
     @Nullable
     public Map<String, Object> getArgs() {
         return fArgs;
+    }
+
+    /**
+     * Get the cpu number
+     * @return the cpu number
+     */
+    public Integer getCpu() {
+        return fCpu;
     }
 }

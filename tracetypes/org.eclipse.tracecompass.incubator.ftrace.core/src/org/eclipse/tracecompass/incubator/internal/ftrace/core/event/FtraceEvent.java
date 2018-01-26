@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
@@ -35,6 +37,9 @@ import org.json.JSONObject;
  */
 public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
 
+    private static final Pattern FTRACE_PATTERN = Pattern.compile("^\\s*(?<comm>.*)-(?<pid>\\d+)(?:\\s+\\(.*\\))?\\s+\\[(?<cpu>\\d+)\\](?:\\s+....)?\\s+(?<timestamp>[0-9]+(?<us>\\.[0-9]+)?): (\\w+:\\s+)+(?<data>.+)"); //$NON-NLS-1$
+    private static final Pattern FTRACE_DATA_PATTERN = Pattern.compile("(?<name>[a-zA-Z_]+): ?(?<keyval>(.+=.+ ?)*)"); //$NON-NLS-1$
+
     private static final double MICRO_TO_NANO = 1000.0;
     private final @Nullable ITmfCallsite fCallsite;
     private final Level fLogLevel;
@@ -50,7 +55,7 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
         fCallsite = null;
         fLogLevel = Level.OFF;
         fName = StringUtils.EMPTY;
-        fField = new FtraceField(StringUtils.EMPTY, 0, "X", null, null, null, null, null, Collections.EMPTY_MAP); //$NON-NLS-1$
+        fField = new FtraceField(StringUtils.EMPTY, 0, 0.0, null, null, Collections.EMPTY_MAP); //$NON-NLS-1$
     }
 
     /**
@@ -64,7 +69,7 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
      *            the event field, contains all the needed data
      */
     public FtraceEvent(ITmfTrace trace, long rank, FtraceField field) {
-        super(trace, rank, TmfTimestamp.fromNanos(field.getTs()), FtraceLookup.get(field.getPhase()), field.getContent());
+        super(trace, rank, TmfTimestamp.fromNanos(field.getTs()), FtraceLookup.get(field.getName()), field.getContent());
         fField = field;
         fName = field.getName();
         fLogLevel = Level.INFO;
@@ -85,6 +90,46 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
     public @Nullable ITmfCallsite getCallsite() {
         return fCallsite;
     }
+
+
+    /** Parse a line from an ftrace ouput file
+     * @param line
+     *          The string to parse
+     * @return An event field
+     */
+    @SuppressWarnings("null")
+    public static FtraceField parseLine(String line) {
+
+        // TODO: guchaj: Understand how @NonNull works (I added SupressWarnings, but I doubt thats the way to go :p)
+
+        Matcher matcher = FTRACE_PATTERN.matcher(line); // guchaj: could this be a static object?
+        if (matcher.matches()) {
+            Integer pid = Integer.parseInt(matcher.group("pid")); //$NON-NLS-1$
+            Integer cpu = Integer.parseInt(matcher.group("cpu")); //$NON-NLS-1$
+            Double timestamp = Double.parseDouble(matcher.group("timestamp")); //$NON-NLS-1$
+            String data = matcher.group("data"); //$NON-NLS-1$
+
+            Matcher dataMatcher = FTRACE_DATA_PATTERN.matcher(data);
+            if (dataMatcher.matches()) {
+                String name = dataMatcher.group("name"); //$NON-NLS-1$
+                String attributes = dataMatcher.group("keyval"); //$NON-NLS-1$
+
+                Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
+
+                // guchaj: Probably inefficient and not fail proof :-(
+                for (String keyval: attributes.split(" ")) { //$NON-NLS-1$
+                    String[] val = keyval.split("="); //$NON-NLS-1$
+                    if (val.length == 2) {
+                        fields.put(val[0], val[1]);
+                    }
+                }
+
+                return new FtraceField(name, cpu, timestamp, pid, null, fields);
+            }
+        }
+        return null;
+    }
+
 
     /**
      * Parse a JSON string
@@ -150,7 +195,7 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
             if (id != null) {
                 argsMap.put(IFtraceConstants.ID, id);
             }
-            return new FtraceField(name, ts, phase, pid, tid, category, id, duration, argsMap);
+            // return new FtraceField(name, ts, phase, pid, tid, category, id, duration, argsMap);
         } catch (JSONException e1) {
             // invalid, return null and it will fail
         }

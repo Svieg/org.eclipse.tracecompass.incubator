@@ -39,6 +39,8 @@ public class FtraceLookup {
         TYPES['f'] = new TmfEventType("Flow End", null); //$NON-NLS-1$
     }
 
+    private static final TmfEventType fakeEvent = new TmfEventType("FAKE", null);
+
     /**
      * Get the event type
      *
@@ -46,8 +48,8 @@ public class FtraceLookup {
      *            the character describing the event type
      * @return a TmfEventType
      */
-    public static ITmfEventType get(char c) {
-        return TYPES[c];
+    public static ITmfEventType get(String c) {
+        return fakeEvent;
     }
 
 }

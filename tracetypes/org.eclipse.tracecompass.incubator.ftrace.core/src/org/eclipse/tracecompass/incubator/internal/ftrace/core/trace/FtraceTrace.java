@@ -210,9 +210,9 @@ public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, 
                     if (!locationInfo.equals(fFileInput.getFilePointer())) {
                         fFileInput.seek(locationInfo);
                     }
-                    String nextJson = readNextEventString(() -> (char) fFileInput.read());
-                    if (nextJson != null) {
-                        FtraceField field = FtraceEvent.parseJson(nextJson);
+                    String nextLine = fFileInput.readLine();
+                    if (nextLine != null) {
+                        FtraceField field = FtraceEvent.parseLine(nextLine);
                         return new FtraceEvent(this, context.getRank(), field);
                     }
                 } catch (IOException e) {
