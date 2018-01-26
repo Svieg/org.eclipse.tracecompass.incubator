@@ -147,9 +147,10 @@ public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, 
         }
         try {
             if (location == null) {
-                // TODO: guchaj: This doesn't work well.
+                // TODO: guchaj: This doesn't work
+                fFileInput.seek(0);
                 String line = fFileInput.readLine();
-                while (line.charAt(0) == '#') {
+                while(line.charAt(0) == '#') {
                     line = fFileInput.readLine();
                 }
             } else if (location.getLocationInfo() instanceof Long) {
