@@ -114,7 +114,7 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
 
             Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
 
-            fields.put(IFtraceConstants.TIMESTAMP, timestamp);
+            fields.put(IFtraceConstants.TIMESTAMP, (long) (timestamp * MICRO_TO_NANO));
             fields.put(IFtraceConstants.NAME, name);
             fields.put(IFtraceConstants.TID, Integer.valueOf(tid).longValue());
             fields.put(IFtraceConstants.PID, Integer.valueOf(pid).longValue());
@@ -241,4 +241,5 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
     public FtraceField getField() {
         return fField;
     }
+
 }

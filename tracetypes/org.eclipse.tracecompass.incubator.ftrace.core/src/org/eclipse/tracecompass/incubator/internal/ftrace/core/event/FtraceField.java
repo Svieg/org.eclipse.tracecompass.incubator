@@ -34,7 +34,7 @@ public class FtraceField {
     private ITmfEventField fContent;
     private final @Nullable Map<String, Object> fArgs;
     private final @Nullable Integer fTid;
-    private final @Nullable Object fPid;
+    private final @Nullable Integer fPid;
 
     /**
      * Constructor
@@ -52,7 +52,7 @@ public class FtraceField {
      * @param fields
      *            event fields (arguments)
      */
-    public FtraceField(String name, Integer cpu, Double ts, @Nullable Object pid, @Nullable Integer tid, Map<String, Object> fields) {
+    public FtraceField(String name, Integer cpu, Double ts, @Nullable Integer pid, @Nullable Integer tid, Map<String, Object> fields) {
         fName = name;
         fCpu = cpu;
         fPid = pid;
@@ -113,7 +113,7 @@ public class FtraceField {
      * @return the process ID
      */
     @Nullable
-    public Object getPid() {
+    public Integer getPid() {
         return fPid;
     }
 

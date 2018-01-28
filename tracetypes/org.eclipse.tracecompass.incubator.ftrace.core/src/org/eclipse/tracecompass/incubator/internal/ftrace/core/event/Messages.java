@@ -86,14 +86,15 @@ public class Messages extends NLS {
     /**
      * Duration
      */
-    public static String FtraceAspects_Cpu;
+    //public static String FtraceAspects_Cpu;
     /**
      * Duration Description
      */
-    public static String FtraceAspects_CpuD;
+    //public static String FtraceAspects_CpuD;
     /**
      * Process Id
      */
+
     public static String FtraceAspects_Pid;
     /**
      * Process Id Description

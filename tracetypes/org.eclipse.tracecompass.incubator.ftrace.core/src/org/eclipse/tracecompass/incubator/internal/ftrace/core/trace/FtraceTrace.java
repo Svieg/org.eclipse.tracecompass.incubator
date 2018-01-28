@@ -13,16 +13,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.util.Collections;
-import java.util.Map;
+//import java.nio.ByteBuffer;
+//import java.util.Collections;
+//import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+//import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelUtils;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.DefaultEventLayout;
-import org.eclipse.jdt.annotation.NonNull;
+//import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
@@ -30,20 +31,23 @@ import org.eclipse.tracecompass.incubator.internal.ftrace.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceAspects;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceEvent;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceField;
+//import org.eclipse.tracecompass.internal.analysis.os.linux.core.kernel.KernelPidAspect;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
-import org.eclipse.tracecompass.tmf.core.project.model.ITmfPropertiesProvider;
+//import org.eclipse.tracecompass.tmf.core.project.model.ITmfPropertiesProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfTraceKnownSize;
+//import org.eclipse.tracecompass.tmf.core.trace.ITmfTraceKnownSize;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
-import org.eclipse.tracecompass.tmf.core.trace.indexer.ITmfPersistentlyIndexable;
+//import org.eclipse.tracecompass.tmf.core.trace.indexer.ITmfPersistentlyIndexable;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Ftrace trace.
@@ -52,9 +56,9 @@ import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
  *         Lajoie, Eva Terriault
  *
  */
-public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, ITmfPropertiesProvider, ITmfTraceKnownSize, IKernelTrace {
+public class FtraceTrace extends TmfTrace implements IKernelTrace/*, ITmfPersistentlyIndexable, ITmfPropertiesProvider, ITmfTraceKnownSize */{
 
-    private static final int CHECKPOINT_SIZE = 10000;
+   // private static final int CHECKPOINT_SIZE = 10000;
     private static final int ESTIMATED_EVENT_SIZE = 90;
     private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
     private static final TmfContext INVALID_CONTEXT = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
@@ -183,8 +187,17 @@ public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, 
     }
 
     @Override
-    public Iterable<@NonNull ITmfEventAspect<?>> getEventAspects() {
-        return FtraceAspects.getAspects();
+    public Iterable<ITmfEventAspect<?>> getEventAspects() {
+
+        /*
+         * This method needs to fill the aspects dynamically because aspects in
+         * the parent class are not all present at the beginning of the trace
+         */
+        ImmutableSet.Builder<ITmfEventAspect<?>> builder = ImmutableSet.builder();
+        builder.addAll(FtraceAspects.getAspects());
+        //builder.addAll(KernelUtils.getKernelAspects());
+        return builder.build();
+        //return FtraceAspects.getAspects();
     }
 
     @Override
@@ -227,21 +240,21 @@ public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, 
         return new TmfLongLocation(temp);
     }
 
-    @Override
+   /* @Override
     public @NonNull Map<@NonNull String, @NonNull String> getProperties() {
         return Collections.singletonMap("Type", "Trace-Event"); //$NON-NLS-1$ //$NON-NLS-2$
-    }
-
+    }*/
+/*
     @Override
     public ITmfLocation restoreLocation(ByteBuffer bufferIn) {
         return new TmfLongLocation(bufferIn);
     }
-
-    @Override
+*/
+    /*@Override
     public int getCheckpointSize() {
         return CHECKPOINT_SIZE;
     }
-
+*/
     /**
      * Wrapper to get a character reader, allows to reconcile between java.nio and
      * java.io
@@ -308,7 +321,7 @@ public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, 
         return null;
     }
 
-    @Override
+    /*@Override
     public int size() {
         RandomAccessFile fileInput = fFileInput;
         if (fileInput == null) {
@@ -321,9 +334,9 @@ public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, 
             // swallow it for now
         }
         return length > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) length;
-    }
+    }*/
 
-    @Override
+   /* @Override
     public int progress() {
         RandomAccessFile fileInput = fFileInput;
         if (fileInput == null) {
@@ -337,7 +350,7 @@ public class FtraceTrace extends TmfTrace implements ITmfPersistentlyIndexable, 
         }
         return length > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) length;
     }
-
+*/
     @Override
     public IKernelAnalysisEventLayout getKernelEventLayout() {
         return DefaultEventLayout.getInstance();
