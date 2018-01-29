@@ -52,7 +52,7 @@ public class FtraceField {
      * @param fields
      *            event fields (arguments)
      */
-    public FtraceField(String name, Integer cpu, Double ts, @Nullable Integer pid, @Nullable Integer tid, Map<String, Object> fields) {
+    public FtraceField(String name, Integer cpu, Long ts, @Nullable Integer pid, @Nullable Integer tid, Map<String, Object> fields) {
         fName = name;
         fCpu = cpu;
         fPid = pid;
@@ -61,7 +61,7 @@ public class FtraceField {
                 .map(entry -> new TmfEventField(entry.getKey(), entry.getValue(), null))
                 .toArray(ITmfEventField[]::new);
         fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, fields, array);
-        fTs = Double.valueOf(ts * 1000000000).longValue();
+        fTs = ts;
         @SuppressWarnings("null")
         Map<@NonNull String, @NonNull Object> args = fields.entrySet().stream()
                 .filter(entry -> {

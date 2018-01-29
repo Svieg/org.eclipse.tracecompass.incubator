@@ -154,12 +154,19 @@ public class FtraceTrace extends TmfTrace implements IKernelTrace/*, ITmfPersist
         }
         try {
             if (location == null) {
-                // TODO: guchaj: This doesn't work
-                fFileInput.seek(0);
+                long seekOffset = 0;
+                fFileInput.seek(seekOffset);
                 String line = fFileInput.readLine();
                 while(line.charAt(0) == '#') {
+
+                    // guchaj: Since each byte is treated as a char, the count is accurate +-
+                    // the endline char. We make the assumption here that ftrace only ouputs
+                    // line terminated with '\n' and never \r\n. This should be verified ( TODO ).
+                    seekOffset += line.length() + 1;
+
                     line = fFileInput.readLine();
                 }
+                fFileInput.seek(seekOffset);
             } else if (location.getLocationInfo() instanceof Long) {
                 fFileInput.seek((Long) location.getLocationInfo());
             }
