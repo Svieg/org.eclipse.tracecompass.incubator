@@ -143,8 +143,8 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
                 String value = keyvalMatcher.group(KEYVAL_PATTERN_VAL_GROUP);
                 if (value != null) {
                     // guchaj: This is a temporary solution. Refactor suggestions are welcome.
-                    if (key.equals("prev_stave")) { //$NON-NLS-1$
-                        fields.put(key, PREV_STATE_LUT[value.charAt(0)]);
+                    if (key.equals("prev_state")) { //$NON-NLS-1$
+                        fields.put(key, Integer.valueOf(PREV_STATE_LUT[value.charAt(0)]).longValue());
                     }
                     else if (StringUtils.isNumeric(value)) {
                         fields.put(key, Long.parseLong(value));
