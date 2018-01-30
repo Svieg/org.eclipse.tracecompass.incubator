@@ -22,11 +22,11 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 //import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelUtils;
-import org.eclipse.tracecompass.analysis.os.linux.core.trace.DefaultEventLayout;
 //import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
+import org.eclipse.tracecompass.incubator.ftrace.layout.FtraceEventLayout;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceAspects;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceEvent;
@@ -360,7 +360,7 @@ public class FtraceTrace extends TmfTrace implements IKernelTrace/*, ITmfPersist
 */
     @Override
     public IKernelAnalysisEventLayout getKernelEventLayout() {
-        return DefaultEventLayout.getInstance();
+        return FtraceEventLayout.getInstance();
     }
 
 }
