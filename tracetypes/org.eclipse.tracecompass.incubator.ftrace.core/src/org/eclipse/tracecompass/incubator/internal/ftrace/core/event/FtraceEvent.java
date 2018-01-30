@@ -9,13 +9,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.ftrace.core.event;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -25,6 +18,12 @@ import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfCallsite;
 import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfSourceLookup;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Trace compass log event
@@ -53,21 +52,8 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
         PREV_STATE_LUT['x'] = "16"; //$NON-NLS-1$
         PREV_STATE_LUT['Z'] = "32"; //$NON-NLS-1$
         PREV_STATE_LUT['P'] = "64"; //$NON-NLS-1$
-        PREV_STATE_LUT['Z'] = "32"; //$NON-NLS-1$
         PREV_STATE_LUT['I'] = "128"; //$NON-NLS-1$
         PREV_STATE_LUT['R'] = "0"; //$NON-NLS-1$
-    }
-
-    /**
-     * Constructor
-     */
-    @Deprecated
-    public FtraceEvent() {
-        super();
-        fCallsite = null;
-        fLogLevel = Level.OFF;
-        fName = StringUtils.EMPTY;
-        fField = new FtraceField(StringUtils.EMPTY, 0, 0L, null, null, Collections.EMPTY_MAP);
     }
 
     /**
@@ -109,18 +95,14 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
      *          The string to parse
      * @return An event field
      */
-    @SuppressWarnings("null")
     public static FtraceField parseLine(String line) {
-
-        // TODO: guchaj: Understand how @NonNull works (I added SupressWarnings, but I doubt thats the way to go :p)
-
-        Matcher matcher = FTRACE_PATTERN.matcher(line); // guchaj: could this be a static object?
+        Matcher matcher = FTRACE_PATTERN.matcher(line);
         if (matcher.matches()) {
             Integer pid = Integer.parseInt(matcher.group("pid")); //$NON-NLS-1$
             Integer tid = pid;
             Integer cpu = Integer.parseInt(matcher.group("cpu")); //$NON-NLS-1$
             Double timestampInSec = Double.parseDouble(matcher.group("timestamp")); //$NON-NLS-1$
-            Long timestampInNano = Double.valueOf(timestampInSec * SECONDS_TO_NANO).longValue();
+            Long timestampInNano = (long)(timestampInSec * SECONDS_TO_NANO);
 
             String name = matcher.group(6);
             name = name.substring(0, name.length() - 2);
@@ -130,8 +112,8 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
 
             fields.put(IFtraceConstants.TIMESTAMP, timestampInNano);
             fields.put(IFtraceConstants.NAME, name);
-            fields.put(IFtraceConstants.TID, Integer.valueOf(tid).longValue());
-            fields.put(IFtraceConstants.PID, Integer.valueOf(pid).longValue());
+            fields.put(IFtraceConstants.TID, tid.longValue());
+            fields.put(IFtraceConstants.PID, pid.longValue());
 
             Matcher keyvalMatcher = KEYVAL_PATTERN.matcher(attributes);
             while (keyvalMatcher.find()) {

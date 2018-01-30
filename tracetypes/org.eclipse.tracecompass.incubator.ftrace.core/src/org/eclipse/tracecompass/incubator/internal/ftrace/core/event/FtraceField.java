@@ -9,15 +9,15 @@
 
 package org.eclipse.tracecompass.incubator.internal.ftrace.core.event;
 
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
+
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 /**
  * Trace Compass Log fields, used as a quick wrapper for Trace compass log data
@@ -62,11 +62,8 @@ public class FtraceField {
                 .toArray(ITmfEventField[]::new);
         fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, fields, array);
         fTs = ts;
-        @SuppressWarnings("null")
         Map<@NonNull String, @NonNull Object> args = fields.entrySet().stream()
-                .filter(entry -> {
-                    return entry.getKey().startsWith("arg/"); //$NON-NLS-1$
-                })
+                .filter(entry -> entry.getKey().startsWith("arg/"))
                 .collect(Collectors.toMap(entry -> entry.getKey().substring(4), Entry::getValue));
         fArgs = args.isEmpty() ? null : args;
     }
