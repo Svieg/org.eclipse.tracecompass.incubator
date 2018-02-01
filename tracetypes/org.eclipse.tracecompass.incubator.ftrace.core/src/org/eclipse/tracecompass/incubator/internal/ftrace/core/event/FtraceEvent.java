@@ -20,6 +20,8 @@ import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfSourceLookup;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -51,20 +53,22 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
     private @NonNull final String fName;
     private final FtraceField fField;
 
-    private static final int[] PREV_STATE_LUT = new int[256];
+    private static final Map<Character, @NonNull Long> PREV_STATE_LUT;
     static {
-        PREV_STATE_LUT['R'] = LinuxValues.TASK_STATE_RUNNING;
-        PREV_STATE_LUT['S'] = LinuxValues.TASK_INTERRUPTIBLE;
-        PREV_STATE_LUT['D'] = LinuxValues.TASK_UNINTERRUPTIBLE;
-        PREV_STATE_LUT['T'] = LinuxValues.TASK_STOPPED__;
-        PREV_STATE_LUT['t'] = LinuxValues.TASK_TRACED__;
-        PREV_STATE_LUT['X'] = LinuxValues.EXIT_ZOMBIE;
-        PREV_STATE_LUT['x'] = LinuxValues.EXIT_ZOMBIE;
-        PREV_STATE_LUT['Z'] = LinuxValues.EXIT_DEAD;
-        PREV_STATE_LUT['P'] = LinuxValues.TASK_DEAD;
-        PREV_STATE_LUT['I'] = LinuxValues.TASK_WAKEKILL;
-    }
+        ImmutableMap.Builder<Character, @NonNull Long> builder = new ImmutableMap.Builder<>();
 
+        builder.put('R', new Long(LinuxValues.TASK_STATE_RUNNING));
+        builder.put('S', new Long(LinuxValues.TASK_INTERRUPTIBLE));
+        builder.put('D', new Long(LinuxValues.TASK_INTERRUPTIBLE));
+        builder.put('T', new Long(LinuxValues.TASK_STOPPED__));
+        builder.put('t', new Long(LinuxValues.TASK_TRACED__));
+        builder.put('X', new Long(LinuxValues.EXIT_ZOMBIE));
+        builder.put('x', new Long(LinuxValues.EXIT_ZOMBIE));
+        builder.put('Z', new Long(LinuxValues.EXIT_DEAD));
+        builder.put('P', new Long(LinuxValues.TASK_DEAD));
+        builder.put('I', new Long(LinuxValues.TASK_WAKEKILL));
+        PREV_STATE_LUT = builder.build();
+    }
     /**
      * Constructor for simple traceEventEvent
      *
@@ -76,7 +80,7 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
      *            the event field, contains all the needed data
      */
     public FtraceEvent(ITmfTrace trace, long rank, FtraceField field) {
-        super(trace, rank, TmfTimestamp.fromNanos(field.getTs()), FtraceLookup.get(field.getName()), field.getContent());
+        super(trace, rank, TmfTimestamp.fromNanos(field.getTs()), FtraceEventTypeFactory.get(field.getName()), field.getContent());
         fField = field;
         fName = field.getName();
         fLogLevel = Level.INFO;
@@ -121,17 +125,15 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
             Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
             fields.put(IFtraceConstants.TIMESTAMP, timestampInNano);
             fields.put(IFtraceConstants.NAME, name);
-            fields.put(IFtraceConstants.TID, tid.longValue());
-            fields.put(IFtraceConstants.PID, pid.longValue());
 
             Matcher keyvalMatcher = KEYVAL_PATTERN.matcher(attributes);
             while (keyvalMatcher.find()) {
                 String key = keyvalMatcher.group(KEYVAL_PATTERN_KEY_GROUP);
                 String value = keyvalMatcher.group(KEYVAL_PATTERN_VAL_GROUP);
                 if (value != null) {
-                    // guchaj: This is a temporary solution. Refactor suggestions are welcome.
+                    // This is a temporary solution. Refactor suggestions are welcome.
                     if (key.equals("prev_state")) { //$NON-NLS-1$
-                        fields.put(key, (PREV_STATE_LUT[value.charAt(0)]));
+                        fields.put(key, PREV_STATE_LUT.getOrDefault(value.charAt(0), 0L));
                     }
                     else if (StringUtils.isNumeric(value)) {
                         fields.put(key, Long.parseLong(value));

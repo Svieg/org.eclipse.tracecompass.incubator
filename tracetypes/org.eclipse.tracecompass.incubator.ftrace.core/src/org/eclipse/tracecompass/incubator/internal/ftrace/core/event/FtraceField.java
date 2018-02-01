@@ -9,15 +9,12 @@
 
 package org.eclipse.tracecompass.incubator.internal.ftrace.core.event;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 /**
  * Trace Compass Log fields, used as a quick wrapper for Trace compass log data
@@ -32,7 +29,6 @@ public class FtraceField {
     private final String fName;
     private final Integer fCpu;
     private ITmfEventField fContent;
-    private final @Nullable Map<String, Object> fArgs;
     private final @Nullable Integer fTid;
     private final @Nullable Integer fPid;
 
@@ -62,10 +58,6 @@ public class FtraceField {
                 .toArray(ITmfEventField[]::new);
         fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, fields, array);
         fTs = ts;
-        Map<@NonNull String, @NonNull Object> args = fields.entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith("arg/"))
-                .collect(Collectors.toMap(entry -> entry.getKey().substring(4), Entry::getValue));
-        fArgs = args.isEmpty() ? null : args;
     }
 
     /**
@@ -112,16 +104,6 @@ public class FtraceField {
     @Nullable
     public Integer getPid() {
         return fPid;
-    }
-
-    /**
-     * Get the arguments passed
-     *
-     * @return a map of the arguments and their field names
-     */
-    @Nullable
-    public Map<String, Object> getArgs() {
-        return fArgs;
     }
 
     /**
