@@ -11,6 +11,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/Users/amfortin/Desktop/projet4/.metadata/.plugins/org.eclipse.pde.core/.bundle_pool/plugins/org.eclipse.tracecompass.analysis.os.linux.core_2.5.0.201801200945.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
