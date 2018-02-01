@@ -111,7 +111,7 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
             Integer tid = pid;
             Integer cpu = Integer.parseInt(matcher.group(FTRACE_PATTERN_CPU_GROUP));
             Double timestampInSec = Double.parseDouble(matcher.group(FTRACE_PATTERN_TIMESTAMP_GROUP));
-            Long timestampInNano = Double.valueOf(timestampInSec * SECONDS_TO_NANO).longValue();
+            Long timestampInNano = (long)(timestampInSec * SECONDS_TO_NANO);
 
             String name = matcher.group(FTRACE_PATTERN_NAME_GROUP);
             name = name.substring(0, name.length() - 2);
@@ -131,7 +131,7 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
                 if (value != null) {
                     // guchaj: This is a temporary solution. Refactor suggestions are welcome.
                     if (key.equals("prev_state")) { //$NON-NLS-1$
-                        fields.put(key, Integer.valueOf(PREV_STATE_LUT[value.charAt(0)]).longValue());
+                        fields.put(key, (PREV_STATE_LUT[value.charAt(0)]));
                     }
                     else if (StringUtils.isNumeric(value)) {
                         fields.put(key, Long.parseLong(value));
