@@ -17,8 +17,6 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
 
-import java.util.Map;
-
 /**
  * Aspects for Trace Compass Logs
  *
@@ -43,15 +41,12 @@ public class FtraceAspects {
             aspectSet = ImmutableList.of(
                     new TraceCompassScopeLogLabelAspect(),
                     TmfBaseAspects.getTimestampAspect(),
-                    new TraceCompassScopeLogArgsAspect(),
                     new FtracePidAspect(),
                     new FtraceCpuAspect());
             aspects = aspectSet;
         }
         return aspectSet;
     }
-
-
 
     private static class TraceCompassScopeLogLabelAspect implements IFtraceAspect<String> {
 
@@ -83,21 +78,4 @@ public class FtraceAspects {
          }
     }
 
-    private static class TraceCompassScopeLogArgsAspect implements IFtraceAspect<Map<String, Object>> {
-
-        @Override
-        public @NonNull String getName() {
-            return String.valueOf(Messages.TraceCompassScopeLogAspects_Args);
-        }
-
-        @Override
-        public @NonNull String getHelpText() {
-            return String.valueOf(Messages.TraceCompassScopeLogAspects_ArgsD);
-        }
-
-        @Override
-        public @Nullable Map<String, Object> resolveTCL(@NonNull FtraceEvent event) {
-            return event.getField().getArgs();
-        }
-    }
 }

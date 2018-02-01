@@ -12,4 +12,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.incubator.ftrace.core,
  org.junit,
  org.eclipse.tracecompass.tmf.core;bundle-version="3.3.0"
-Export-Package: org.eclipse.tracecompass.incubator.ftrace.core.tests
+Export-Package: org.eclipse.tracecompass.incubator.ftrace.core.tests,
+ org.eclipse.tracecompass.incubator.ftrace.core.tests.event,
+ org.eclipse.tracecompass.incubator.ftrace.core.tests.trace

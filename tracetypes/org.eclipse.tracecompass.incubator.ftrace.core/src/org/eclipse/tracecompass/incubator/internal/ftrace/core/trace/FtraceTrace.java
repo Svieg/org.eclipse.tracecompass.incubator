@@ -10,6 +10,10 @@
 package org.eclipse.tracecompass.incubator.internal.ftrace.core.trace;
 
 import com.google.common.collect.ImmutableSet;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
@@ -17,23 +21,23 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
-import org.eclipse.tracecompass.incubator.ftrace.layout.FtraceEventLayout;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceAspects;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceEvent;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceField;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.layout.FtraceEventLayout;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
-import org.eclipse.tracecompass.tmf.core.trace.*;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
+import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 
 /**
  * Ftrace trace.
@@ -144,8 +148,8 @@ public class FtraceTrace extends TmfTrace implements IKernelTrace{
                 String line = fFileInput.readLine();
                 while(line.charAt(0) == '#') {
 
-                    // guchaj: Since each byte is treated as a char, the count is accurate +-
-                    // the endline char. We make the assumption here that ftrace only ouputs
+                    // Since each byte is treated as a char, the count is accurate -
+                    // the endline char. We make the assumption here that ftrace only outputs
                     // line terminated with '\n' and never \r\n. This should be verified ( TODO ).
                     seekOffset += line.length() + 1;
 
