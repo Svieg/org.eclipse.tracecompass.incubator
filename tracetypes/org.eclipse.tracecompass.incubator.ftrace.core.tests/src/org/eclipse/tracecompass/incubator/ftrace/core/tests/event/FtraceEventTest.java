@@ -24,12 +24,11 @@ public class FtraceEventTest {
         assertEquals(3210263482000L, (long) field.getTs());
         assertEquals("sched_wakeup", field.getName());
 
-        assertEquals(8, field.getContent().getFields().size());
+        assertEquals(7, field.getContent().getFields().size());
         assertEquals("sched_wakeup", field.getContent().getFieldValue(String.class, "name"));
         assertEquals("daemonsu", field.getContent().getFieldValue(String.class, "comm"));
         assertEquals((Long) 1L, field.getContent().getFieldValue(Long.class, "success"));
         assertEquals((Long) 16620L, field.getContent().getFieldValue(Long.class, "pid"));
-        assertEquals((Long) 9514L, field.getContent().getFieldValue(Long.class, "tid"));
         assertEquals((Long) 3210263482000L, field.getContent().getFieldValue(Long.class, "ts"));
         assertEquals((Long) 120L, field.getContent().getFieldValue(Long.class, "prio"));
         assertEquals((Long) 0L, field.getContent().getFieldValue(Long.class, "target_cpu"));
