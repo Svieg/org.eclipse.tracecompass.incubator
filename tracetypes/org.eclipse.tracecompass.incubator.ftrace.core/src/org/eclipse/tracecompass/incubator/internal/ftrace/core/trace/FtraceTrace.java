@@ -9,20 +9,11 @@
 
 package org.eclipse.tracecompass.incubator.internal.ftrace.core.trace;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-//import java.nio.ByteBuffer;
-//import java.util.Collections;
-//import java.util.Map;
-
+import com.google.common.collect.ImmutableSet;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-//import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelUtils;
-//import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
@@ -31,23 +22,18 @@ import org.eclipse.tracecompass.incubator.internal.ftrace.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceAspects;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceEvent;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceField;
-//import org.eclipse.tracecompass.internal.analysis.os.linux.core.kernel.KernelPidAspect;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
-//import org.eclipse.tracecompass.tmf.core.project.model.ITmfPropertiesProvider;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
-//import org.eclipse.tracecompass.tmf.core.trace.ITmfTraceKnownSize;
-import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
-import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
-//import org.eclipse.tracecompass.tmf.core.trace.indexer.ITmfPersistentlyIndexable;
+import org.eclipse.tracecompass.tmf.core.trace.*;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 
-import com.google.common.collect.ImmutableSet;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * Ftrace trace.
@@ -56,9 +42,8 @@ import com.google.common.collect.ImmutableSet;
  *         Lajoie, Eva Terriault
  *
  */
-public class FtraceTrace extends TmfTrace implements IKernelTrace/*, ITmfPersistentlyIndexable, ITmfPropertiesProvider, ITmfTraceKnownSize */{
+public class FtraceTrace extends TmfTrace implements IKernelTrace{
 
-   // private static final int CHECKPOINT_SIZE = 10000;
     private static final int ESTIMATED_EVENT_SIZE = 90;
     private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
     private static final TmfContext INVALID_CONTEXT = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
@@ -202,9 +187,7 @@ public class FtraceTrace extends TmfTrace implements IKernelTrace/*, ITmfPersist
          */
         ImmutableSet.Builder<ITmfEventAspect<?>> builder = ImmutableSet.builder();
         builder.addAll(FtraceAspects.getAspects());
-        //builder.addAll(KernelUtils.getKernelAspects());
         return builder.build();
-        //return FtraceAspects.getAspects();
     }
 
     @Override
@@ -247,117 +230,6 @@ public class FtraceTrace extends TmfTrace implements IKernelTrace/*, ITmfPersist
         return new TmfLongLocation(temp);
     }
 
-   /* @Override
-    public @NonNull Map<@NonNull String, @NonNull String> getProperties() {
-        return Collections.singletonMap("Type", "Trace-Event"); //$NON-NLS-1$ //$NON-NLS-2$
-    }*/
-/*
-    @Override
-    public ITmfLocation restoreLocation(ByteBuffer bufferIn) {
-        return new TmfLongLocation(bufferIn);
-    }
-*/
-    /*@Override
-    public int getCheckpointSize() {
-        return CHECKPOINT_SIZE;
-    }
-*/
-    /**
-     * Wrapper to get a character reader, allows to reconcile between java.nio and
-     * java.io
-     *
-     * @author Matthew Khouzam
-     *
-     */
-    public static interface IReaderWrapper {
-        /**
-         * Read the next character
-         *
-         * @return the next char
-         * @throws IOException
-         *             out of chars to read
-         */
-        char read() throws IOException;
-    }
-
-    /**
-     * Manually parse a string of JSON. High performance to extract one object
-     *
-     * @param parser
-     *            the reader
-     * @return a String with a json object
-     * @throws IOException
-     *             end of file, file not found or such
-     */
-    public static @Nullable String readNextEventString(IReaderWrapper parser) throws IOException {
-        StringBuffer sb = new StringBuffer();
-        int scope = -1;
-        int arrScope = 0;
-        boolean inQuotes = false;
-        char elem = parser.read();
-        while (elem != (char) -1) {
-            if (elem == '"') {
-                inQuotes = !inQuotes;
-            } else {
-                if (inQuotes) {
-                    // do nothing
-                } else if (elem == '[') {
-                    arrScope++;
-                } else if (elem == ']') {
-                    if (arrScope > 0) {
-                        arrScope--;
-                    } else {
-                        return null;
-                    }
-                } else if (elem == '{') {
-                    scope++;
-                } else if (elem == '}') {
-                    if (scope > 0) {
-                        scope--;
-                    } else {
-                        sb.append(elem);
-                        return sb.toString();
-                    }
-                }
-            }
-            if (scope >= 0) {
-                sb.append(elem);
-            }
-            elem = parser.read();
-        }
-        return null;
-    }
-
-    /*@Override
-    public int size() {
-        RandomAccessFile fileInput = fFileInput;
-        if (fileInput == null) {
-            return 0;
-        }
-        long length = 0;
-        try {
-            length = fileInput.length();
-        } catch (IOException e) {
-            // swallow it for now
-        }
-        return length > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) length;
-    }*/
-
-   /* @Override
-    public int progress() {
-        RandomAccessFile fileInput = fFileInput;
-        if (fileInput == null) {
-            return 0;
-        }
-        long length = 0;
-        try {
-            length = fileInput.getFilePointer();
-        } catch (IOException e) {
-            // swallow it for now
-        }
-        return length > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) length;
-    }
-*/
     @Override
     public IKernelAnalysisEventLayout getKernelEventLayout() {
         return FtraceEventLayout.getInstance();
