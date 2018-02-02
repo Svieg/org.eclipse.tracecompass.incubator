@@ -43,7 +43,7 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
     private static final String FTRACE_PATTERN_NAME_GROUP = "name"; //$NON-NLS-1$
     private static final String FTRACE_PATTERN_DATA_GROUP = "data"; //$NON-NLS-1$
 
-    private static final Pattern KEYVAL_PATTERN = Pattern.compile("(?<key>[^\\s=]+)=(?<val>[^\\s=]+)"); //$NON-NLS-1$
+    private static final Pattern KEYVAL_PATTERN = Pattern.compile("(?<key>[^\\s=\\[\\]]+)=(?<val>[^\\s=\\[\\]]+)"); //$NON-NLS-1$
     private static final String KEYVAL_PATTERN_KEY_GROUP = "key"; //$NON-NLS-1$
     private static final String KEYVAL_PATTERN_VAL_GROUP = "val"; //$NON-NLS-1$
 

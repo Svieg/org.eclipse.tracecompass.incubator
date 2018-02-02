@@ -1,5 +1,6 @@
 package org.eclipse.tracecompass.incubator.internal.ftrace.core.layout;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.DefaultEventLayout;
 
@@ -21,7 +22,7 @@ public class FtraceEventLayout extends DefaultEventLayout {
      *
      * @return the instance
      */
-    public static synchronized DefaultEventLayout getInstance() {
+    public static synchronized @NonNull FtraceEventLayout getInstance() {
         FtraceEventLayout inst = INSTANCE;
         if (inst == null) {
             inst = new FtraceEventLayout();
@@ -31,9 +32,9 @@ public class FtraceEventLayout extends DefaultEventLayout {
     }
 
     /* Field names */
-    private static final String NEXT_PID = "next_pid"; //$NON-NLS-1$
-    private static final String PREV_PID = "prev_pid"; //$NON-NLS-1$
-    private static final String TID = "pid"; //$NON-NLS-1$
+    private static final @NonNull String NEXT_PID = "next_pid"; //$NON-NLS-1$
+    private static final @NonNull String PREV_PID = "prev_pid"; //$NON-NLS-1$
+    private static final @NonNull String TID = "pid"; //$NON-NLS-1$
 
     @Override
     public String fieldNextTid() {

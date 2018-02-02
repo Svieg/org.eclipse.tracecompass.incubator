@@ -15,10 +15,10 @@ import static org.junit.Assert.assertEquals;
  */
 public class FtraceEventTest {
     /**
-     * Testing of parse line function using line from an ftrace output
+     * Testing of parse line with function using line from an ftrace output
      */
     @Test
-    public void testParseLine() {
+    public void testParseSchedWakeupLine() {
         String line = "kworker/0:0-9514  [000] d..4  3210.263482: sched_wakeup: comm=daemonsu pid=16620 prio=120 success=1 target_cpu=000";
         FtraceField field = FtraceEvent.parseLine(line);
 
@@ -38,4 +38,18 @@ public class FtraceEventTest {
         assertEquals((Long) 0L, field.getContent().getFieldValue(Long.class, "target_cpu"));
     }
 
+    /**
+     * Testing of parse line with Irq_raise event function using line from an ftrace output
+     */
+    @Test
+    public void testParseIrqRaise() {
+        String line = "ksoftirqd/1-12    [001] d.s1   387.212674: softirq_raise: vec=9 [action=RCU]";
+
+        FtraceField field = FtraceEvent.parseLine(line);
+        assertEquals((Integer)1, field.getCpu());
+        assertEquals("softirq_raise", field.getName());
+
+        assertEquals((Long)9L, field.getContent().getFieldValue(Long.class, "vec"));
+        assertEquals("RCU", field.getContent().getFieldValue(String.class, "action"));
+    }
 }
