@@ -4,13 +4,13 @@
    <extension
          point="org.eclipse.linuxtools.tmf.core.tracetype">
       <category
-            id="org.eclipse.tracecompass.traceevent.core.ftrace"
+            id="org.eclipse.tracecompass.incubator.ftrace.core"
             name="Ftrace Format">
       </category>
       <type
-            category="org.eclipse.tracecompass.traceevent.core.ftrace"
+            category="org.eclipse.tracecompass.incubator.ftrace.core"
             event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
-            id="org.eclipse.tracecompass.incubator.traceevent.core.trace"
+            id="org.eclipse.tracecompass.incubator.ftrace.core"
             isDirectory="false"
             name="Generic Ftrace Trace"
             trace_type="org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.FtraceTrace">
