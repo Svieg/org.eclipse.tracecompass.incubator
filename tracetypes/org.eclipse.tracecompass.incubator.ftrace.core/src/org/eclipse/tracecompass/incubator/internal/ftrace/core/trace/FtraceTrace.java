@@ -10,10 +10,6 @@
 package org.eclipse.tracecompass.incubator.internal.ftrace.core.trace;
 
 import com.google.common.collect.ImmutableSet;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
@@ -30,23 +26,22 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
-import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
-import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
+import org.eclipse.tracecompass.tmf.core.trace.*;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * Ftrace trace.
  *
  * @author Guillaume Champagne, Alexis-Maurer Fortin, Hugo Genesse, Pierre-Yves
- *         Lajoie, Eva Terriault
- *
+ * Lajoie, Eva Terriault
  */
-public class FtraceTrace extends TmfTrace implements IKernelTrace{
+public class FtraceTrace extends TmfTrace implements IKernelTrace {
 
     private static final int ESTIMATED_EVENT_SIZE = 90;
     private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
@@ -138,24 +133,22 @@ public class FtraceTrace extends TmfTrace implements IKernelTrace{
             return INVALID_CONTEXT;
         }
         final TmfContext context = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
-        if (NULL_LOCATION.equals(location) || fFile == null) {
+        if (NULL_LOCATION.equals(location)) {
             return context;
         }
         try {
             if (location == null) {
-                long seekOffset = 0;
-                fFileInput.seek(seekOffset);
-                String line = fFileInput.readLine();
-                while(line.charAt(0) == '#') {
-
-                    // Since each byte is treated as a char, the count is accurate -
-                    // the endline char. We make the assumption here that ftrace only outputs
-                    // line terminated with '\n' and never \r\n. This should be verified ( TODO ).
-                    seekOffset += line.length() + 1;
-
-                    line = fFileInput.readLine();
+                fFileInput.seek(0);
+                boolean header = true;
+                while (header) {
+                    char firstChar = (char) fFileInput.readByte();
+                    if (firstChar == '#') {
+                        fFileInput.readLine();
+                    } else {
+                        header = false;
+                    }
                 }
-                fFileInput.seek(seekOffset);
+                fFileInput.seek(fFileInput.getFilePointer() - 1);
             } else if (location.getLocationInfo() instanceof Long) {
                 fFileInput.seek((Long) location.getLocationInfo());
             }
