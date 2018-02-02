@@ -2,17 +2,21 @@ package org.eclipse.tracecompass.incubator.ftrace.core.tests.event;
 
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceEvent;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceField;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * FtraceEvent test class
+ *
+ * @author Guillaume Champagne, Alexis-Maurer Fortin, Hugo Genesse, Pierre-Yves
+ *         Lajoie, Eva Terriault
+ *
+ */
 public class FtraceEventTest {
-
-    @Before
-    public void setUp() throws Exception {
-    }
-
+    /**
+     * Testing of parse line function using line from an ftrace output
+     */
     @Test
     public void testParseLine() {
         String line = "kworker/0:0-9514  [000] d..4  3210.263482: sched_wakeup: comm=daemonsu pid=16620 prio=120 success=1 target_cpu=000";
