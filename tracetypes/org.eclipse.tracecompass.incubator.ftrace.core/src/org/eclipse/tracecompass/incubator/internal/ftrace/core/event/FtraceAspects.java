@@ -16,19 +16,23 @@ import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxPidAspe
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
+import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 
 /**
  * Aspects for Trace Compass Logs
  *
- * @author Guillaume Champagne, Alexis-Maurer Fortin, Hugo Genesse, Pierre-Yves
- *          Lajoie, Eva Terriault
+ * @author Guillaume Champagne
+ * @author Alexis-Maurer Fortin
+ * @author Hugo Genesse
+ * @author Pierre-Yves Lajoie
+ * @author Eva Terriault
  */
 public class FtraceAspects {
 
     /**
      * Apects of a trace
      */
-    private static Iterable<@NonNull ITmfEventAspect<?>> aspects;
+    private static Iterable<@NonNull ITmfEventAspect<?>> sfAspects;
 
     /**
      * Get the event aspects
@@ -36,32 +40,32 @@ public class FtraceAspects {
      * @return get the event aspects
      */
     public static @NonNull Iterable<@NonNull ITmfEventAspect<?>> getAspects() {
-        Iterable<@NonNull ITmfEventAspect<?>> aspectSet = aspects;
+        Iterable<@NonNull ITmfEventAspect<?>> aspectSet = sfAspects;
         if (aspectSet == null) {
             aspectSet = ImmutableList.of(
-                    new TraceCompassScopeLogLabelAspect(),
+                    new FtraceEventNameAspect(),
                     TmfBaseAspects.getTimestampAspect(),
                     new FtracePidAspect(),
                     new FtraceCpuAspect());
-            aspects = aspectSet;
+            sfAspects = aspectSet;
         }
         return aspectSet;
     }
 
-    private static class TraceCompassScopeLogLabelAspect implements IFtraceAspect<String> {
+    private static class FtraceEventNameAspect implements ITmfEventAspect<String> {
 
         @Override
         public @NonNull String getName() {
-            return String.valueOf(Messages.TraceCompassScopeLogAspects_Name);
+            return String.valueOf(Messages.FtraceAspects_Name);
         }
 
         @Override
         public @NonNull String getHelpText() {
-            return String.valueOf(Messages.TraceCompassScopeLogAspects_NameD);
+            return String.valueOf(Messages.FtraceAspects_NameD);
         }
 
         @Override
-        public @Nullable String resolveTCL(@NonNull FtraceEvent event) {
+        public @Nullable String resolve(@NonNull ITmfEvent event) {
             return event.getName();
         }
     }
@@ -75,7 +79,17 @@ public class FtraceAspects {
                 return ftraceEvent.getField().getPid();
             }
             return null;
-         }
+        }
     }
 
+    private static class FtraceCpuAspect extends TmfCpuAspect {
+
+        @Override
+        public @Nullable Integer resolve(ITmfEvent event) {
+            if (!(event instanceof FtraceEvent)) {
+                return null;
+            }
+            return ((FtraceEvent) event).getField().getCpu();
+        }
+    }
 }

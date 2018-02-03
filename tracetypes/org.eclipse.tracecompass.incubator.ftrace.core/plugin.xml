@@ -12,7 +12,7 @@
             event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
             id="org.eclipse.tracecompass.incubator.ftrace.core"
             isDirectory="false"
-            name="Generic Ftrace Trace"
+            name="%trace.ftrace"
             trace_type="org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.FtraceTrace">
       </type>
    </extension>

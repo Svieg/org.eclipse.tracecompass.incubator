@@ -14,8 +14,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * Constants for the ftrace format
  *
- * @author Guillaume Champagne, Alexis-Maurer Fortin, Hugo Genesse, Pierre-Yves
- *          Lajoie, Eva Terriault
+ * @author Guillaume Champagne
+ * @author Alexis-Maurer Fortin
+ * @author Hugo Genesse
+ * @author Pierre-Yves Lajoie
+ * @author Eva Terriault
  */
 @NonNullByDefault
 public interface IFtraceConstants {

@@ -1,27 +1,41 @@
+/*******************************************************************************
+ * Copyright (c) 2018 Ecole Polytechnique de Montreal
+ *
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
 package org.eclipse.tracecompass.incubator.ftrace.core.tests.event;
 
-import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceEvent;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceField;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
- * FtraceEvent test class
+ * FtraceField test class
  *
- * @author Guillaume Champagne, Alexis-Maurer Fortin, Hugo Genesse, Pierre-Yves
- *         Lajoie, Eva Terriault
- *
+ * @author Guillaume Champagne
+ * @author Alexis-Maurer Fortin
+ * @author Hugo Genesse
+ * @author Pierre-Yves Lajoie
+ * @author Eva Terriault
  */
-public class FtraceEventTest {
+public class FtraceFieldTest {
+
     /**
      * Testing of parse line with function using line from an ftrace output
      */
     @Test
     public void testParseSchedWakeupLine() {
         String line = "kworker/0:0-9514  [000] d..4  3210.263482: sched_wakeup: comm=daemonsu pid=16620 prio=120 success=1 target_cpu=000";
-        FtraceField field = FtraceEvent.parseLine(line);
 
+        FtraceField field = FtraceField.parseLine(line);
+
+        assertNotNull(field);
         assertEquals((Integer) 0, field.getCpu());
         assertEquals((Integer) 9514, field.getPid());
         assertEquals((Integer) 9514, field.getTid());
@@ -39,17 +53,20 @@ public class FtraceEventTest {
     }
 
     /**
-     * Testing of parse line with Irq_raise event function using line from an ftrace output
+     * Testing of parse line with Irq_raise event function using line from an ftrace
+     * output
      */
     @Test
     public void testParseIrqRaise() {
         String line = "ksoftirqd/1-12    [001] d.s1   387.212674: softirq_raise: vec=9 [action=RCU]";
 
-        FtraceField field = FtraceEvent.parseLine(line);
-        assertEquals((Integer)1, field.getCpu());
+        FtraceField field = FtraceField.parseLine(line);
+
+        assertNotNull(field);
+        assertEquals((Integer) 1, field.getCpu());
         assertEquals("softirq_raise", field.getName());
 
-        assertEquals((Long)9L, field.getContent().getFieldValue(Long.class, "vec"));
+        assertEquals((Long) 9L, field.getContent().getFieldValue(Long.class, "vec"));
         assertEquals("RCU", field.getContent().getFieldValue(String.class, "action"));
     }
 }

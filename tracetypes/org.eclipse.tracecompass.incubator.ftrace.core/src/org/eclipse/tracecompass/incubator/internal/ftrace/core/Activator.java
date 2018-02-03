@@ -13,10 +13,18 @@ import org.eclipse.tracecompass.common.core.TraceCompassActivator;
 
 /**
  * Activator
+ *
+ * @author Guillaume Champagne
+ * @author Alexis-Maurer Fortin
+ * @author Hugo Genesse
+ * @author Pierre-Yves Lajoie
+ * @author Eva Terriault
  */
 public class Activator extends TraceCompassActivator {
 
-    /** The plug-in ID */
+    /**
+     * The plug-in ID
+     */
     public static final String PLUGIN_ID = "org.eclipse.tracecompass.incubator.ftrace.core"; //$NON-NLS-1$
 
     /**
@@ -44,4 +52,3 @@ public class Activator extends TraceCompassActivator {
     }
 
 }
-

@@ -38,8 +38,11 @@ import java.io.RandomAccessFile;
 /**
  * Ftrace trace.
  *
- * @author Guillaume Champagne, Alexis-Maurer Fortin, Hugo Genesse, Pierre-Yves
- * Lajoie, Eva Terriault
+ * @author Guillaume Champagne
+ * @author Alexis-Maurer Fortin
+ * @author Hugo Genesse
+ * @author Pierre-Yves Lajoie
+ * @author Eva Terriault
  */
 public class FtraceTrace extends TmfTrace implements IKernelTrace {
 
@@ -77,7 +80,7 @@ public class FtraceTrace extends TmfTrace implements IKernelTrace {
             String line = rafile.readLine();
             while ((line != null) && (lineCount++ < MAX_LINES)) {
                 try {
-                    FtraceField field = FtraceEvent.parseLine(line);
+                    FtraceField field = FtraceField.parseLine(line);
                     if (field != null) {
                         matches++;
                     }
@@ -179,8 +182,8 @@ public class FtraceTrace extends TmfTrace implements IKernelTrace {
     public Iterable<ITmfEventAspect<?>> getEventAspects() {
 
         /*
-         * This method needs to fill the aspects dynamically because aspects in
-         * the parent class are not all present at the beginning of the trace
+         * This method needs to fill the aspects dynamically because aspects in the
+         * parent class are not all present at the beginning of the trace
          */
         ImmutableSet.Builder<ITmfEventAspect<?>> builder = ImmutableSet.builder();
         builder.addAll(FtraceAspects.getAspects());
@@ -204,7 +207,7 @@ public class FtraceTrace extends TmfTrace implements IKernelTrace {
                     }
                     String nextLine = fFileInput.readLine();
                     if (nextLine != null) {
-                        FtraceField field = FtraceEvent.parseLine(nextLine);
+                        FtraceField field = FtraceField.parseLine(nextLine);
                         if (field != null) {
                             return new FtraceEvent(this, context.getRank(), field);
                         }
