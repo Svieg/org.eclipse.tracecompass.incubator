@@ -59,10 +59,10 @@ public class FtraceField {
     }
 
     private final Long fTs;
-    private final String fName;
+    private String fName;
     private final Integer fCpu;
-    private final @Nullable Integer fTid;
-    private final @Nullable Integer fPid;
+    private @Nullable Integer fTid;
+    private @Nullable Integer fPid;
     private ITmfEventField fContent;
 
     /**
@@ -142,6 +142,17 @@ public class FtraceField {
     }
 
     /**
+     * Set the event's content
+     * @param fields Map of field values
+     */
+    public void setContent(Map<String, Object> fields) {
+        ITmfEventField[] array = fields.entrySet().stream()
+                .map(entry -> new TmfEventField(entry.getKey(), entry.getValue(), null))
+                .toArray(ITmfEventField[]::new);
+        fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, fields, array);
+    }
+
+    /**
      * Get the name of the event
      *
      * @return the event name
@@ -151,12 +162,28 @@ public class FtraceField {
     }
 
     /**
+     * Set the event's name
+     *
+     * @param name New name of the event
+     */
+    public void setName(String name) {
+        fName = name;
+    }
+
+    /**
      * Get the TID of the event
      *
      * @return the event TID
      */
     public @Nullable Integer getTid() {
         return fTid;
+    }
+
+    /**
+     * @param tid The new tid
+     */
+    public void setTid(Integer tid) {
+        fTid = tid;
     }
 
     /**
@@ -176,6 +203,13 @@ public class FtraceField {
     @Nullable
     public Integer getPid() {
         return fPid;
+    }
+
+    /**
+     * @param pid The new pid
+     */
+    public void setPid(Integer pid) {
+        fPid = pid;
     }
 
     /**

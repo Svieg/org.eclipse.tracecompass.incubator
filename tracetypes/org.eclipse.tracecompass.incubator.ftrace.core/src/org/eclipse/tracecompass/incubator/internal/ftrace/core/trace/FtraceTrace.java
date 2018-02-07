@@ -207,11 +207,9 @@ public class FtraceTrace extends TmfTrace implements IKernelTrace {
                         fFileInput.seek(locationInfo);
                     }
                     String nextLine = fFileInput.readLine();
-                    if (nextLine != null) {
-                        FtraceField field = FtraceField.parseLine(nextLine);
-                        if (field != null) {
-                            return new FtraceEvent(this, context.getRank(), field);
-                        }
+                    FtraceField field = parseLine(nextLine);
+                    if (field != null) {
+                        return new FtraceEvent(this, context.getRank(), field);
                     }
                 } catch (IOException e) {
                     Activator.getInstance().logError("Error parsing event", e); //$NON-NLS-1$
@@ -234,6 +232,21 @@ public class FtraceTrace extends TmfTrace implements IKernelTrace {
     @Override
     public IKernelAnalysisEventLayout getKernelEventLayout() {
         return FtraceEventLayout.getInstance();
+    }
+
+    /**
+     * Parse a line into a FtraceField object.
+     * This method is can be overridden by Trace types that inherits
+     * from FtraceTrace but uses a slightly different line format.
+     *
+     * @param line Line to parse
+     * @return FtraceField object
+     */
+    protected @Nullable FtraceField parseLine(String line) {
+        if (line != null) {
+            return FtraceField.parseLine(line);
+        }
+        return null;
     }
 
 }
