@@ -23,6 +23,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.android.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceField;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.IFtraceConstants;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.FtraceTrace;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -40,9 +41,6 @@ import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 @SuppressWarnings("restriction")
 public class AndroidTrace extends FtraceTrace {
 
-    private static final Pattern ATRACE_PATTERN = Pattern.compile("^\\s*(?<comm>.*)-(?<pid>\\d+)(?:\\s+\\(.*\\))?\\s+\\((?<tgid>\\d+)\\)\\s+\\[(?<cpu>\\d+)\\](?:\\s+....)?\\s+(?<timestamp>[0-9]+(?<us>\\.[0-9]+)?): (?<name>\\w+:\\s+)+(?<data>.+)"); //$NON-NLS-1$
-    private static final String ATRACE_TGID_GROUP = "tgid"; //$NON-NLS-1$
-    private static final String ATRACE_DATA_GROUP = "data"; //$NON-NLS-1$
     private static final String ATRACE_TRACEEVENT_EVENT = "tracing_mark_write"; //$NON-NLS-1$
 
     private static final Pattern TRACE_EVENT_PATTERN = Pattern.compile("(?<phase>\\w)(\\|(?<tid>\\d+)\\|(?<content>[^\\|]+))?"); //$NON-NLS-1$
@@ -84,26 +82,8 @@ public class AndroidTrace extends FtraceTrace {
         FtraceField field = super.parseLine(line);
 
         if (field != null) {
-            Matcher matcher = ATRACE_PATTERN.matcher(line);
+            Matcher matcher = IFtraceConstants.FTRACE_PATTERN.matcher(line);
             if (matcher.matches()) {
-
-                /*
-                 * Atrace adds a 'TGID' column that allows us to make a distinction
-                 * between events occurring on processes and threads.
-                 */
-                Integer tgid = Integer.parseInt(matcher.group(ATRACE_TGID_GROUP));
-
-                /*
-                 * After calling FtraceTrace::ParseLine, the pid is populated
-                 * with the pid form the point of view of the scheduler.
-                 * There's no distinction between pid and tid. However,when there's a mismatch
-                 * between the tgid and the pid, we know the event happened on a thread and that
-                 * the tgid is the actual pid, and the pid the tid.
-                 */
-                Integer pid = field.getPid();
-                if (!tgid.equals(pid)) {
-                    field.setPid(tgid);
-                }
 
                 /*
                  * User spaces event that permit us to create the call stack are inserted
@@ -112,13 +92,14 @@ public class AndroidTrace extends FtraceTrace {
                  * handle them separately.
                  */
                 if (field.getName().equals(ATRACE_TRACEEVENT_EVENT)) {
-                    String data = matcher.group(ATRACE_DATA_GROUP);
+                    String data = matcher.group(IFtraceConstants.FTRACE_DATA_GROUP);
                     Matcher atraceMatcher = TRACE_EVENT_PATTERN.matcher(data);
                     if (atraceMatcher.matches()) {
                         String phase = atraceMatcher.group(TRACE_EVENT_PHASE_GROUP);
-                        String pname = matcher.group("comm"); //$NON-NLS-1$
+                        String pname = matcher.group("comm");
                         String content = atraceMatcher.group(TRACE_EVENT_CONTENT_GROUP);
-                        Integer tid = field.getPid();
+                        Integer tid = field.getTid();
+                        Integer pid = field.getPid();
 
                         Map<@NonNull String, @NonNull Object> argmap = new HashMap<>();
                         if (phase != null) {
@@ -127,8 +108,11 @@ public class AndroidTrace extends FtraceTrace {
                         if (tid != null) {
                             argmap.put(ITraceEventConstants.TID, tid);
                         }
+                        if (pid != null) {
+                            argmap.put("pid", pid); //$NON-NLS-1$
+                        }
                         if (pname != null) {
-                            argmap.put("pid", pname); //$NON-NLS-1$
+                            argmap.put("tname", pname); //$NON-NLS-1$
                         }
                         if (content != null) {
                             field.setName(content);

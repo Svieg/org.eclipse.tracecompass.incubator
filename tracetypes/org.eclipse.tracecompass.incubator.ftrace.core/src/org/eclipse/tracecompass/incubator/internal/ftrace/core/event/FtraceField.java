@@ -108,6 +108,20 @@ public class FtraceField {
 
             String attributes = matcher.group(IFtraceConstants.FTRACE_DATA_GROUP);
 
+            /*
+             * There's no distinction between pid and tid in scheduling events. However,when there's a mismatch
+             * between the tgid and the pid, we know the event happened on a thread and that
+             * the tgid is the actual pid, and the pid the tid.
+             */
+            String tgid = matcher.group(IFtraceConstants.FTRACE_TGID_GROUP);
+            if (tgid != null) {
+                Integer tgidNumeric = Integer.parseInt(tgid);
+                if (!tgidNumeric.equals(pid)) {
+                    pid = tgidNumeric;
+                }
+            }
+
+
             Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
             fields.put(IFtraceConstants.TIMESTAMP, timestampInNano);
             fields.put(IFtraceConstants.NAME, name);

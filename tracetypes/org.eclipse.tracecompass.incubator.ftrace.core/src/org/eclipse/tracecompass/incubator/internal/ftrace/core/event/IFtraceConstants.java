@@ -45,7 +45,7 @@ public interface IFtraceConstants {
     /**
      * Pattern to match an ftrace event line
      */
-    Pattern FTRACE_PATTERN = Pattern.compile("^\\s*(?<comm>.*)-(?<pid>\\d+)(?:\\s+\\(.*\\))?\\s+\\[(?<cpu>\\d+)\\](?:\\s+....)?\\s+(?<timestamp>[0-9]+(?<us>\\.[0-9]+)?): (?<name>\\w+:\\s+)+(?<data>.+)"); //$NON-NLS-1$
+    Pattern FTRACE_PATTERN = Pattern.compile("^\\s*(?<comm>.*)-(?<pid>\\d+)(?:\\s+\\([^0-9]*(?<tgid>\\d+)?\\))?\\s+\\[(?<cpu>\\d+)\\](?:\\s+....)?\\s+(?<timestamp>[0-9]+(?<us>\\.[0-9]+)?): (?<name>\\w+:\\s+)+(?<data>.+)"); //$NON-NLS-1$
     /**
      * PID group in {@link IFtraceConstants#FTRACE_PATTERN}
      */
@@ -66,4 +66,8 @@ public interface IFtraceConstants {
      * Data group in {@link IFtraceConstants#FTRACE_PATTERN}
      */
     String FTRACE_DATA_GROUP = "data"; //$NON-NLS-1$
+    /**
+     * TGID group in {@link IFtraceConstants#FTRACE_PATTERN}
+     */
+    String FTRACE_TGID_GROUP = "tgid"; //$NON-NLS-1$
 }
