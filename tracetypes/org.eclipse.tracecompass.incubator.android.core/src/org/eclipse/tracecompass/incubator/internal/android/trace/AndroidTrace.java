@@ -19,6 +19,7 @@ import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceField
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.IFtraceConstants;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.GenericFtrace;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
+import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 
@@ -48,14 +49,17 @@ public class AndroidTrace extends GenericFtrace {
     // private static final String TRACE_EVENT_TID_GROUP = "tid"; //$NON-NLS-1$
     private static final String TRACE_EVENT_CONTENT_GROUP = "content"; //$NON-NLS-1$
 
+    private static final int MAX_LINES = 100;
+    private static final int MAX_CONFIDENCE = 100;
+
+
     @Override
     public IStatus validate(IProject project, String path) {
-        /*
-         * guchaj: Ideally, we would be able to differentiate atrace traces from "real"
-         * ftrace traces. ATM, the only difference we could base this choice on is the
-         * presence of the 'TGID' column in atrace and not in ftrace, but that is not
-         * really future proof. We should investigate what is the best decision here
-         * (TODO)
+        /* guchaj: Ideally, we would be able to differentiate
+         * atrace traces from "real" ftrace traces. ATM, the only difference
+         * we could base this choice on is the presence of userspace events
+         * in atrace and not in ftrace, but that is not really future proof.
+         * We should investigate what is the best decision here (TODO)
          */
 
         File file = new File(path);
@@ -74,8 +78,46 @@ public class AndroidTrace extends GenericFtrace {
             Activator.getInstance().logError("Error validating file: " + path, e); //$NON-NLS-1$
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "IOException validating file: " + path, e); //$NON-NLS-1$
         }
-
+        try (BufferedRandomAccessFile rafile = new BufferedRandomAccessFile(path, "r")) { //$NON-NLS-1$
+            int lineCount = 0;
+            int matches = 0;
+            String line = rafile.readLine();
+            int function_call_count = 0;
+            while ((line != null) && (lineCount++ < MAX_LINES)) {
+                try {
+                    FtraceField field = this.parseLine(line);
+                    if (field != null) {
+                        matches++;
+                        /*
+                         * If the Tid and Pid are different, we know the event happened
+                         * on a thread
+                         */
+                        if (field.getTid() != field.getPid()) {
+                            function_call_count++;
+                        }
+                    }
+                } catch (RuntimeException e) {
+                    confidence = Integer.MIN_VALUE;
+                }
+                confidence = MAX_CONFIDENCE * matches / lineCount;
+                line = rafile.readLine();
+            }
+            //We increase the confidence if there is function calls
+            if (function_call_count > 0) {
+                confidence += function_call_count;
+            }
+            else {
+                confidence--;
+            }
+            if (matches == 0) {
+                return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Most assuredly NOT a traceevent trace"); //$NON-NLS-1$
+            }
+        } catch (IOException e) {
+            Activator.getInstance().logError("Error validating file: " + path, e); //$NON-NLS-1$
+            return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "IOException validating file: " + path, e); //$NON-NLS-1$
+        }
         return new TraceValidationStatus(confidence, Activator.PLUGIN_ID);
+
     }
 
     @Override
