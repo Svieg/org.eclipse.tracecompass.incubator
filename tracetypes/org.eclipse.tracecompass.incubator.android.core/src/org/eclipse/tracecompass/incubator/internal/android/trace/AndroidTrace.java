@@ -80,6 +80,10 @@ public class AndroidTrace extends GenericFtrace {
 
     @Override
     protected @Nullable FtraceField parseLine(String line) {
+        if (line == null || line.isEmpty()) {
+            return null;
+        }
+
         FtraceField field = FtraceField.parseLine(line);
 
         if (field != null) {
@@ -97,7 +101,7 @@ public class AndroidTrace extends GenericFtrace {
                     Matcher atraceMatcher = TRACE_EVENT_PATTERN.matcher(data);
                     if (atraceMatcher.matches()) {
                         String phase = atraceMatcher.group(TRACE_EVENT_PHASE_GROUP);
-                        String pname = matcher.group("comm");
+                        String pname = matcher.group(IFtraceConstants.FTRACE_COMM_GROUP);
                         String content = atraceMatcher.group(TRACE_EVENT_CONTENT_GROUP);
                         Integer tid = field.getTid();
                         Integer pid = field.getPid();
