@@ -104,10 +104,10 @@ public class AndroidTrace extends GenericFtrace {
             }
             //We increase the confidence if there is function calls
             if (function_call_count > 0) {
-                confidence += function_call_count;
+                confidence ++;
             }
             else {
-                confidence--;
+                confidence = 0;
             }
             if (matches == 0) {
                 return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Most assuredly NOT a traceevent trace"); //$NON-NLS-1$
