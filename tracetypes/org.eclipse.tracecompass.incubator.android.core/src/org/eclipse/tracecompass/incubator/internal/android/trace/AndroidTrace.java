@@ -9,13 +9,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.android.trace;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -24,10 +17,17 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.android.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceField;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.IFtraceConstants;
-import org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.FtraceTrace;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.GenericFtrace;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Android trace gathered via atrace.
@@ -39,7 +39,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
  * @author Eva Terriault
  */
 @SuppressWarnings("restriction")
-public class AndroidTrace extends FtraceTrace {
+public class AndroidTrace extends GenericFtrace {
 
     private static final String ATRACE_TRACEEVENT_EVENT = "tracing_mark_write"; //$NON-NLS-1$
 
@@ -79,7 +79,7 @@ public class AndroidTrace extends FtraceTrace {
 
     @Override
     protected @Nullable FtraceField parseLine(String line) {
-        FtraceField field = super.parseLine(line);
+        FtraceField field = FtraceField.parseLine(line);
 
         if (field != null) {
             Matcher matcher = IFtraceConstants.FTRACE_PATTERN.matcher(line);
