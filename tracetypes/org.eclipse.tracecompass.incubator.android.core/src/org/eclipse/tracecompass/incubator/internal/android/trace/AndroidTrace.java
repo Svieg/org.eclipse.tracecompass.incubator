@@ -50,11 +50,12 @@ public class AndroidTrace extends GenericFtrace {
 
     @Override
     public IStatus validate(IProject project, String path) {
-        /* guchaj: Ideally, we would be able to differentiate
-         * atrace traces from "real" ftrace traces. ATM, the only difference
-         * we could base this choice on is the presence of the 'TGID' column
-         * in atrace and not in ftrace, but that is not really future proof.
-         * We should investigate what is the best decision here (TODO)
+        /*
+         * guchaj: Ideally, we would be able to differentiate atrace traces from "real"
+         * ftrace traces. ATM, the only difference we could base this choice on is the
+         * presence of the 'TGID' column in atrace and not in ftrace, but that is not
+         * really future proof. We should investigate what is the best decision here
+         * (TODO)
          */
 
         File file = new File(path);
@@ -86,10 +87,10 @@ public class AndroidTrace extends GenericFtrace {
             if (matcher.matches()) {
 
                 /*
-                 * User spaces event that permit us to create the call stack are inserted
-                 * in the raw trace. Those events are named 'tracing_mark_write'. The format
-                 * in the "function" column is not like any other ftrace events, so we must
-                 * handle them separately.
+                 * User spaces event that permit us to create the call stack are inserted in the
+                 * raw trace. Those events are named 'tracing_mark_write'. The format in the
+                 * "function" column is not like any other ftrace events, so we must handle them
+                 * separately.
                  */
                 if (field.getName().equals(ATRACE_TRACEEVENT_EVENT)) {
                     String data = matcher.group(IFtraceConstants.FTRACE_DATA_GROUP);

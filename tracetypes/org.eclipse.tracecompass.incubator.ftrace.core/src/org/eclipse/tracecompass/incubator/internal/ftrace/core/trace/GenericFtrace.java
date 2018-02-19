@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2018 Ecole Polytechnique de Montreal
+ *
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.ftrace.core.trace;
 
 import com.google.common.collect.ImmutableSet;
@@ -27,6 +35,15 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.regex.Matcher;
 
+/**
+ * Generic Ftrace trace.
+ *
+ * @author Guillaume Champagne
+ * @author Alexis-Maurer Fortin
+ * @author Hugo Genesse
+ * @author Pierre-Yves Lajoie
+ * @author Eva Terriault
+ */
 public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
     private static final int ESTIMATED_EVENT_SIZE = 90;
     private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
@@ -35,6 +52,11 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
 
     private RandomAccessFile fFileInput;
 
+    /**
+     * @param line
+     *            Trace line to be parsed
+     * @return Parsed FtraceField
+     */
     protected abstract @Nullable FtraceField parseLine(String line);
 
     @Override

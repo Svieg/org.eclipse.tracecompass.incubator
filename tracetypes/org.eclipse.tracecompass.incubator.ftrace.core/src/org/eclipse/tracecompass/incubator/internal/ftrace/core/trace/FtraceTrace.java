@@ -82,11 +82,12 @@ public class FtraceTrace extends GenericFtrace {
     }
 
     /**
-     * Parse a line into a FtraceField object.
-     * This method is can be overridden by Trace types that inherits
-     * from FtraceTrace but uses a slightly different line format.
+     * Parse a line into a FtraceField object. This method is can be overridden by
+     * Trace types that inherits from FtraceTrace but uses a slightly different line
+     * format.
      *
-     * @param line Line to parse
+     * @param line
+     *            Line to parse
      * @return FtraceField object
      */
     @Override
