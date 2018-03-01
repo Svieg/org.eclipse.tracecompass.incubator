@@ -23,11 +23,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
+import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
+import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackEdge;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
+import org.eclipse.tracecompass.incubator.internal.analysis.core.model.CompositeHostModel;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventAspects;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
@@ -108,6 +111,15 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             int quark = stateSystemBuilder.getQuarkAbsoluteAndAdd("dummy entry to make gpu entries work"); //$NON-NLS-1$
             stateSystemBuilder.modifyAttribute(0, TmfStateValue.newValueInt(0), quark);
         }
+        //Add trace kernel analysis module to the model
+        //evter: not sure where to put this. Temporary testing purpose.
+        IHostModel hostModel = ModelManager.getModelFor(trace.getHostId());
+        KernelAnalysisModule kernelAnalysis = TmfTraceUtils.getAnalysisModuleOfClass(trace, KernelAnalysisModule.class, KernelAnalysisModule.ID);
+        //evter: TODO: add method in IHostModel?
+        if (kernelAnalysis != null) {
+            ((CompositeHostModel)hostModel).setKernelModule(trace, kernelAnalysis);
+        }
+
         fLinksStore = segStore;
         fSafeTime = trace.getStartTime();
         fIdAspect = TraceEventAspects.ID_ASPECT;
@@ -119,7 +131,10 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
         if (pName == null) {
             int processId = getProcessId(event);
-            pName = (processId == UNKNOWN_PID) ? UNKNOWN : Integer.toString(processId);
+            String hostId = event.getTrace().getHostId();
+            IHostModel hostModel = ModelManager.getModelFor(hostId);
+            String execName = hostModel.getExecName(processId, -1);
+            pName = (execName != null && !execName.isEmpty()) ? execName : Integer.toString(processId);
         }
 
         return pName;
