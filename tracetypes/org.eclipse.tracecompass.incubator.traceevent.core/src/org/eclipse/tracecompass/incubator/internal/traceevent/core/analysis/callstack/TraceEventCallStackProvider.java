@@ -111,12 +111,12 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             int quark = stateSystemBuilder.getQuarkAbsoluteAndAdd("dummy entry to make gpu entries work"); //$NON-NLS-1$
             stateSystemBuilder.modifyAttribute(0, TmfStateValue.newValueInt(0), quark);
         }
+
         //Add trace kernel analysis module to the model
-        //evter: not sure where to put this. Temporary testing purpose.
         IHostModel hostModel = ModelManager.getModelFor(trace.getHostId());
         KernelAnalysisModule kernelAnalysis = TmfTraceUtils.getAnalysisModuleOfClass(trace, KernelAnalysisModule.class, KernelAnalysisModule.ID);
-        //evter: TODO: add method in IHostModel?
-        if (kernelAnalysis != null) {
+        if (kernelAnalysis != null && hostModel instanceof CompositeHostModel) {
+            kernelAnalysis.waitForCompletion();
             ((CompositeHostModel)hostModel).setKernelModule(trace, kernelAnalysis);
         }
 
