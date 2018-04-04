@@ -20,4 +20,5 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.ftrace.core;x-friend
  org.eclipse.tracecompass.incubator.internal.ftrace.core.trace
 Import-Package: com.google.common.collect,
  com.google.common.primitives,
- org.apache.commons.lang3
+ org.apache.commons.lang3,
+ org.eclipse.tracecompass.tmf.ctf.core.trace
