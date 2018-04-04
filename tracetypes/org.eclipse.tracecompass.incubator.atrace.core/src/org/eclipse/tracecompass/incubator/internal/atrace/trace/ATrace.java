@@ -14,12 +14,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.atrace.event.SystraceProcessDumpEvent;
+import org.eclipse.tracecompass.incubator.atrace.event.SystraceProcessDumpEventField;
 import org.eclipse.tracecompass.incubator.internal.atrace.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.GenericFtraceField;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.IGenericFtraceConstants;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.GenericFtrace;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 
@@ -27,6 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -114,6 +120,34 @@ public class ATrace extends GenericFtrace {
         }
         return new TraceValidationStatus(confidence, Activator.PLUGIN_ID);
 
+    }
+
+    //TODO: This is temporary. Overrides the GenericFtrace method
+    @Override
+    public ITmfEvent parseEvent(ITmfContext context) {
+
+        //Create new false event
+        Random rand = new Random();
+
+        String fName = "myFieldName";
+        int fCpu = rand.nextInt(4);
+        int fTid = rand.nextInt(100);
+        int fPid = rand.nextInt(100);
+        int fPpid = rand.nextInt(100);  //TODO: Not sure what to put here
+        Long fStatus = rand.nextLong(); //TODO: Not sure what to put here
+        Long timestampInNano = (long) 58729001; //rand.nextLong(); //TODO: What to do with timestamp when in process dump?
+
+        Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
+        //TODO: Externalise strings
+        fields.put("name", fName); //$NON-NLS-1$
+        fields.put("tid", (long)fTid); //$NON-NLS-1$
+        fields.put("pid", (long) fPid); //$NON-NLS-1$
+        fields.put("ppid", (long)fPpid); //$NON-NLS-1$
+        fields.put("cpu", (long)fCpu); //$NON-NLS-1$
+        fields.put("status", fStatus); //$NON-NLS-1$
+
+        SystraceProcessDumpEventField field = new SystraceProcessDumpEventField(fName, fCpu, timestampInNano, fPid, fTid, fields);
+        return new SystraceProcessDumpEvent(this, context.getRank(), TmfTimestamp.fromNanos(timestampInNano), field);
     }
 
     @Override
