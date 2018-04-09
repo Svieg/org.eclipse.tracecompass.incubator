@@ -9,15 +9,16 @@
 
 package org.eclipse.tracecompass.incubator.atrace.event;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Ftrace field class
@@ -30,65 +31,94 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
  */
 @NonNullByDefault
 public class SystraceProcessDumpEventField extends TmfEventField {
-    /*private final Long fTs;
-    private String fName;
-    private final Integer fCpu;
-    private @Nullable Integer fTid;
+
+    private static final Pattern PROCESS_DUMP_PATTERN = Pattern
+            .compile("^\\s*(?<user>\\w+)\\s+(?<pid>\\d+)\\s+(?<ppid>\\d+)\\s+(?<vsz>\\d+)\\s+(?<rss>\\d+)\\s+(?<wchan>\\w+)\\s+(?<pc>\\d+)\\s+(?<s>\\w+)\\s+(?<name>[^w]+)\\s+(?<comm>[^\\|+])"); //$NON-NLS-1$
+    private @Nullable Integer fPpid;
     private @Nullable Integer fPid;
-    private ITmfEventField fContent;*/
 
     /**
      * Constructor
      *
-     * @param name   event name
-     * @param cpu    the cpu number
-     * @param ts     the timestamp in ns
-     * @param pid    the process id
-     * @param tid    the threadId
-     * @param fields event fields (arguments)
+     * @param name
+     *            event name
+     * @param pid
+     *            the process id
+     * @param pPid
+     *            the parent process id
+     * @param fields
+     *            event fields (arguments)
      */
-    public SystraceProcessDumpEventField(String name, Integer cpu, @Nullable Integer pid, @Nullable Integer tid, Map<String, Object> fields) {
-        super(name, null, fields.entrySet().stream()
+    public SystraceProcessDumpEventField(String name, @Nullable Integer pid, @Nullable Integer pPid, Map<String, Object> fields) {
+        super(name, fields, fields.entrySet().stream()
                 .map(entry -> new TmfEventField(entry.getKey(), entry.getValue(), null))
-                .toArray(ITmfEventField[]::new)); //TODO: What's value?
-
-       /* fName = name;
-        fCpu = cpu;
+                .toArray(ITmfEventField[]::new));
         fPid = pid;
-        fTid = tid;
-        ITmfEventField[] array = fields.entrySet().stream()
-                .map(entry -> new TmfEventField(entry.getKey(), entry.getValue(), null))
-                .toArray(ITmfEventField[]::new) ;
-        fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, fields, array);
+        fPpid = pPid;
+    }
 
-        fTs = ts;*/
-    }
-    @Override
-    public Object getValue() {
-        return (Long) super.getValue();
-    }
+    /**
+     * Parse a line from an process dump in Systrace Output
+     *
+     * @param line
+     *            The string to parse
+     * @return An event field
+     */
     public static @Nullable SystraceProcessDumpEventField parseLine(@Nullable String line) {
-        //Create new false event
-        if (line!=null)
-        {
-            String fName = "kthreadd";
-            int fCpu = 1;
-            //int fTid = rand.nextInt(100); //TODO: Not in our process dump
-            int fPid = 1;
-            int fPpid = 0;
-            //Long fStatus = rand.nextLong(); //TODO: Not sure what to put here
+        Matcher matcher = PROCESS_DUMP_PATTERN.matcher(line);
+        if (matcher.matches()) {
+            String fName = matcher.group("name"); //$NON-NLS-1$
+            Integer fPid = Integer.parseInt(matcher.group("pid")); //$NON-NLS-1$
+            Integer fPpid = Integer.parseInt(matcher.group("ppid")); //$NON-NLS-1$
 
             Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
             fields.put("name", fName); //$NON-NLS-1$
-            //fields.put("tid", (long)fTid); //$NON-NLS-1$
             fields.put("pid", (long) fPid); //$NON-NLS-1$
-            fields.put("ppid", (long)fPpid); //$NON-NLS-1$
-            //fields.put("cpu", (long)fCpu); //$NON-NLS-1$
-            //fields.put("status", fStatus); //$NON-NLS-1$
+            fields.put("ppid", (long) fPpid); //$NON-NLS-1$
 
-            return new SystraceProcessDumpEventField(fName, fCpu, fPid, fPpid, fields);
+            return new SystraceProcessDumpEventField(fName, fPid, fPpid, fields);
         }
         return null;
+    }
+
+    /**
+     * Get the PPid of the event
+     *
+     * @return the parent process ID
+     */
+    @Nullable
+    public Integer getPpid() {
+        return fPpid;
+    }
+
+    /**
+     * Set the PPID of the event
+     *
+     * @param Ppid
+     *            the new parent process ID
+     */
+    public void setPpid(Integer Ppid) {
+        this.fPpid = Ppid;
+    }
+
+    /**
+     * Get pid
+     *
+     * @return the process ID
+     */
+    @Nullable
+    public Integer getPid() {
+        return fPid;
+    }
+
+    /**
+     * Set the PID of the event
+     *
+     * @param pid
+     *            The new pid
+     */
+    public void setPid(Integer pid) {
+        this.fPid = pid;
     }
 
 }
