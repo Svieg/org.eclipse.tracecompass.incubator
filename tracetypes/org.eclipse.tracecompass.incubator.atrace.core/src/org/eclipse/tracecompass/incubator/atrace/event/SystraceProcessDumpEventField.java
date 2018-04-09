@@ -37,8 +37,6 @@ public class SystraceProcessDumpEventField extends TmfEventField {
     private @Nullable Integer fPid;
     private ITmfEventField fContent;*/
 
-    private static final Pattern PROCESS_DUMP_PATTERN = Pattern.compile("^\\s*(?<user>\\w+)\\s+(?<pid>\\d+)\\s+(?<ppid>\\d+)\\s+(?<vsz>\\d+)\\s+(?<rss>\\d+)\\s+(?<wchan>\\w+)\\s+(?<pc>\\d+)\\s+(?<s>\\w+)\\s+(?<name>[^w]+)\\s+(?<comm>[^\\|+])");
-
     /**
      * Constructor
      *

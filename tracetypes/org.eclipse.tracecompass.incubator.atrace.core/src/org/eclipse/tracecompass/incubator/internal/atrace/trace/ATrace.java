@@ -51,6 +51,7 @@ public class ATrace extends GenericFtrace {
 
     private static final String ATRACE_TRACEEVENT_EVENT = "tracing_mark_write"; //$NON-NLS-1$
 
+    private static final Pattern PROCESS_DUMP_PATTERN = Pattern.compile("^\\s*(?<user>\\w+)\\s+(?<pid>\\d+)\\s+(?<ppid>\\d+)\\s+(?<vsz>\\d+)\\s+(?<rss>\\d+)\\s+(?<wchan>\\w+)\\s+(?<pc>\\d+)\\s+(?<s>\\w+)\\s+(?<name>[^w]+)\\s+(?<comm>[^\\|+])");
     private static final Pattern TRACE_EVENT_PATTERN = Pattern.compile("(?<phase>\\w)(\\|(?<tid>\\d+)\\|(?<content>[^\\|]+))?"); //$NON-NLS-1$
     private static final String TRACE_EVENT_PHASE_GROUP = "phase"; //$NON-NLS-1$
     private static final String TRACE_EVENT_CONTENT_GROUP = "content"; //$NON-NLS-1$
