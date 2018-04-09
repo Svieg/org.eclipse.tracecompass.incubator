@@ -32,7 +32,6 @@ import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -59,7 +58,6 @@ public class ATrace extends GenericFtrace {
     private static final int MAX_CONFIDENCE = 100;
 
     private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
-    private RandomAccessFile fFileInput;
 
 
     @Override

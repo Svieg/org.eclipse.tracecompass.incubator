@@ -50,7 +50,7 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
     private static final TmfContext INVALID_CONTEXT = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
     private File fFile;
 
-    private RandomAccessFile fFileInput;
+    protected RandomAccessFile fFileInput;
 
     /**
      * @param line
