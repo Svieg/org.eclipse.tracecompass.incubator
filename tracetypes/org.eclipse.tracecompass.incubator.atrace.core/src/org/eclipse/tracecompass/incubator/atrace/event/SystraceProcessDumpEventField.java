@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 public class SystraceProcessDumpEventField extends TmfEventField {
 
     private static final Pattern PROCESS_DUMP_PATTERN = Pattern
-            .compile("^\\s*(?<user>\\w+)\\s+(?<pid>\\d+)\\s+(?<ppid>\\d+)\\s+(?<vsz>\\d+)\\s+(?<rss>\\d+)\\s+(?<wchan>\\w+)\\s+(?<pc>\\d+)\\s+(?<s>\\w+)\\s+(?<name>[^w]+)\\s+(?<comm>[^\\|+])"); //$NON-NLS-1$
+            .compile("^\\s*(?<user>.*?)\\s+(?<pid>\\d+)\\s+(?<ppid>\\d+)\\s+(?<vsz>\\d+)\\s+(?<rss>\\d+)\\s+(?<wchan>.*?)\\s+(?<pc>.*?)\\s+(?<s>.*?)\\s+(?<name>.*?)\\s+(?:<comm>.*?)?"); //$NON-NLS-1$
     private @Nullable Integer fPpid;
     private @Nullable Integer fPid;
 
