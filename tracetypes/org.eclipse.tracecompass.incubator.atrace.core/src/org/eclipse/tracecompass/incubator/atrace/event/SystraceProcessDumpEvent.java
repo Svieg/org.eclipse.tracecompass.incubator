@@ -18,8 +18,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  */
 public class SystraceProcessDumpEvent  extends TmfEvent implements ITmfSourceLookup {
 
-     //TODO: Should be the same as the layout. What's the good way to do that?
-    private static final String DEFAULT_SYSTRACE_PROCESS_DUMP_EVENT_NAME = "state_dump_ftrace_test"; //$NON-NLS-1$
 
     private @NonNull final String fName;
     private final @Nullable ITmfCallsite fCallsite;
@@ -40,11 +38,10 @@ public class SystraceProcessDumpEvent  extends TmfEvent implements ITmfSourceLoo
             SystraceProcessDumpEventField field) {
         super(trace, rank, timestamp, null /* TODO: not sure if OK */, field);
          //TmfTimestamp.fromNanos(field.getTs()), SystraceProcessDumpEventTypeFactory.get(field.getName()), field.getContent());
-        fName = DEFAULT_SYSTRACE_PROCESS_DUMP_EVENT_NAME;
+        fName = ISystraceProcessDumpConstants.DEFAULT_SYSTRACE_PROCESS_DUMP_EVENT_NAME;
         fCallsite = null;
 
     }
-
     /**
      * Get the name of the event
      *

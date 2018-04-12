@@ -18,7 +18,6 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Ftrace field class
@@ -32,9 +31,7 @@ import java.util.regex.Pattern;
 @NonNullByDefault
 public class SystraceProcessDumpEventField extends TmfEventField {
 
-    private static final Pattern PROCESS_DUMP_PATTERN = Pattern
-            .compile("^\\s*(?<user>.*?)\\s+(?<pid>\\d+)\\s+(?<ppid>\\d+)\\s+(?<vsz>\\d+)\\s+(?<rss>\\d+)\\s+(?<wchan>.*?)\\s+(?<pc>.*?)\\s+(?<s>.*?)\\s+(?<name>.*?)\\s+(?:<comm>.*?)?"); //$NON-NLS-1$
-    private @Nullable Integer fPpid;
+        private @Nullable Integer fPpid;
     private @Nullable Integer fPid;
 
     /**
@@ -65,7 +62,7 @@ public class SystraceProcessDumpEventField extends TmfEventField {
      * @return An event field
      */
     public static @Nullable SystraceProcessDumpEventField parseLine(@Nullable String line) {
-        Matcher matcher = PROCESS_DUMP_PATTERN.matcher(line);
+        Matcher matcher = ISystraceProcessDumpConstants.PROCESS_DUMP_PATTERN.matcher(line);
         if (matcher.matches()) {
             String fName = matcher.group("name"); //$NON-NLS-1$
             Integer fPid = Integer.parseInt(matcher.group("pid")); //$NON-NLS-1$
@@ -75,6 +72,11 @@ public class SystraceProcessDumpEventField extends TmfEventField {
             fields.put("name", fName); //$NON-NLS-1$
             fields.put("pid", (long) fPid); //$NON-NLS-1$
             fields.put("ppid", (long) fPpid); //$NON-NLS-1$
+
+            //TODO: Need to set a value for TID and status
+            fields.put("tid", (long) fPid); //$NON-NLS-1$
+            fields.put("status", (long) 0); //$NON-NLS-1$
+
 
             return new SystraceProcessDumpEventField(fName, fPid, fPpid, fields);
         }

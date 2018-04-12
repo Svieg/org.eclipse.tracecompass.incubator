@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.atrace.event.ISystraceProcessDumpConstants;
 import org.eclipse.tracecompass.incubator.atrace.event.SystraceProcessDumpEvent;
 import org.eclipse.tracecompass.incubator.atrace.event.SystraceProcessDumpEventField;
 import org.eclipse.tracecompass.incubator.internal.atrace.core.Activator;
@@ -25,17 +26,18 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Traces gathered via atrace.
@@ -50,7 +52,6 @@ public class ATrace extends GenericFtrace {
 
     private static final String ATRACE_TRACEEVENT_EVENT = "tracing_mark_write"; //$NON-NLS-1$
 
-    private static final Pattern TRACE_EVENT_PATTERN = Pattern.compile("(?<phase>\\w)(\\|(?<tid>\\d+)\\|(?<content>[^\\|]+))?"); //$NON-NLS-1$
     private static final String TRACE_EVENT_PHASE_GROUP = "phase"; //$NON-NLS-1$
     private static final String TRACE_EVENT_CONTENT_GROUP = "content"; //$NON-NLS-1$
 
@@ -58,6 +59,8 @@ public class ATrace extends GenericFtrace {
     private static final int MAX_CONFIDENCE = 100;
 
     private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
+    private static final TmfContext INVALID_CONTEXT = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
+
 
 
     @Override
@@ -127,6 +130,62 @@ public class ATrace extends GenericFtrace {
     }
 
     @Override
+    public ITmfContext seekEvent(ITmfLocation location) {
+        if (fFile == null) {
+            return INVALID_CONTEXT;
+        }
+        final TmfContext context = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
+        if (NULL_LOCATION.equals(location)) {
+            return context;
+        }
+        try {
+            if (location == null) {
+                fFileInput.seek(0);
+                long lineStartOffset = fFileInput.getFilePointer();
+                String line = fFileInput.readLine();
+
+                //Look for process dump matches
+                Matcher processDumpMatcher = ISystraceProcessDumpConstants.PROCESS_DUMP_PATTERN.matcher(line);
+                boolean match = processDumpMatcher.matches();
+                while (!match && line!=null) {
+                    lineStartOffset = fFileInput.getFilePointer();
+                    line = fFileInput.readLine();
+                    processDumpMatcher = ISystraceProcessDumpConstants.PROCESS_DUMP_PATTERN.matcher(line);
+                    match = processDumpMatcher.matches();
+                }
+                if (!match)
+                {
+                  //Look for atrace matches
+                    Matcher atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
+                    match = atraceMatcher.matches();
+                    while (!match) {
+                        lineStartOffset = fFileInput.getFilePointer();
+                        atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
+                        line = fFileInput.readLine();
+                        match = atraceMatcher.matches();
+                    }
+                }
+             fFileInput.seek(lineStartOffset);
+            } else if (location.getLocationInfo() instanceof Long) {
+                fFileInput.seek((Long) location.getLocationInfo());
+            }
+            context.setLocation(new TmfLongLocation(fFileInput.getFilePointer()));
+            context.setRank(0);
+            return context;
+        } catch (final java.lang.NullPointerException e) {
+            Activator.getInstance().logError("Error seeking event. Null Pointer Exception: " + getPath(), e); //$NON-NLS-1$
+            return context;
+        } catch (final FileNotFoundException e) {
+            Activator.getInstance().logError("Error seeking event. File not found: " + getPath(), e); //$NON-NLS-1$
+            return context;
+        } catch (final IOException e) {
+            Activator.getInstance().logError("Error seeking event. File: " + getPath(), e); //$NON-NLS-1$
+            return context;
+        }
+
+    }
+
+    @Override
     public ITmfEvent parseEvent(ITmfContext context) {
         ITmfEvent event = super.parseEvent(context);
         if (event == null)
@@ -139,6 +198,7 @@ public class ATrace extends GenericFtrace {
                 if (location.equals(NULL_LOCATION)) {
                     locationInfo = 0L;
                 }
+                super.parseEvent(context);
                 if (locationInfo != null) {
                     try {
                         if (!locationInfo.equals(fFileInput.getFilePointer())) {
@@ -179,7 +239,7 @@ public class ATrace extends GenericFtrace {
                  */
                 if (field.getName().equals(ATRACE_TRACEEVENT_EVENT)) {
                     String data = matcher.group(IGenericFtraceConstants.FTRACE_DATA_GROUP);
-                    Matcher atraceMatcher = TRACE_EVENT_PATTERN.matcher(data);
+                    Matcher atraceMatcher = ISystraceProcessDumpConstants.TRACE_EVENT_PATTERN.matcher(data);
                     if (atraceMatcher.matches()) {
                         String phase = atraceMatcher.group(TRACE_EVENT_PHASE_GROUP);
                         String pname = matcher.group(IGenericFtraceConstants.FTRACE_COMM_GROUP);
