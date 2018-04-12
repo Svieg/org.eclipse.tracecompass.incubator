@@ -146,25 +146,16 @@ public class ATrace extends GenericFtrace {
 
                 //Look for process dump matches
                 Matcher processDumpMatcher = ISystraceProcessDumpConstants.PROCESS_DUMP_PATTERN.matcher(line);
-                boolean match = processDumpMatcher.matches();
-                while (!match && line!=null) {
+                Matcher atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
+
+                line = fFileInput.readLine();
+                while (!atraceMatcher.matches() || !processDumpMatcher.matches()) {
                     lineStartOffset = fFileInput.getFilePointer();
+                    atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
+                   processDumpMatcher = ISystraceProcessDumpConstants.PROCESS_DUMP_PATTERN.matcher(line);
                     line = fFileInput.readLine();
-                    processDumpMatcher = ISystraceProcessDumpConstants.PROCESS_DUMP_PATTERN.matcher(line);
-                    match = processDumpMatcher.matches();
                 }
-                if (!match)
-                {
-                  //Look for atrace matches
-                    Matcher atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
-                    match = atraceMatcher.matches();
-                    while (!match) {
-                        lineStartOffset = fFileInput.getFilePointer();
-                        atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
-                        line = fFileInput.readLine();
-                        match = atraceMatcher.matches();
-                    }
-                }
+
              fFileInput.seek(lineStartOffset);
             } else if (location.getLocationInfo() instanceof Long) {
                 fFileInput.seek((Long) location.getLocationInfo());
