@@ -48,9 +48,9 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
     private static final int ESTIMATED_EVENT_SIZE = 90;
     private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
     private static final TmfContext INVALID_CONTEXT = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
-    protected File fFile;
+    private File fFile;
 
-    protected RandomAccessFile fFileInput;
+    private RandomAccessFile fFileInput;
 
     /**
      * @param line

@@ -12,6 +12,7 @@ package org.eclipse.tracecompass.incubator.atrace.event;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.IGenericFtraceConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 
@@ -78,7 +79,7 @@ public class SystraceProcessDumpEventField extends TmfEventField {
             fields.put("tid", (long) fPid); //$NON-NLS-1$
             fields.put("status", (long) 2); //$NON-NLS-1$
 
-            return new SystraceProcessDumpEventField(IAtraceConstants.DEFAULT_SYSTRACE_PROCESS_DUMP_EVENT_NAME, fPid, fPpid, fields);
+            return new SystraceProcessDumpEventField(IGenericFtraceConstants.PROCESS_DUMP_EVENT_NAME, fPid, fPpid, fields);
         }
         return null;
     }

@@ -10,6 +10,7 @@
 package org.eclipse.tracecompass.incubator.internal.atrace.trace;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
@@ -23,6 +24,7 @@ import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.IGenericFtr
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.GenericFtrace;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
@@ -35,6 +37,7 @@ import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -62,6 +65,32 @@ public class ATrace extends GenericFtrace {
     private static final TmfContext INVALID_CONTEXT = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
 
     private long startingTimestamp;
+
+    private File fFile;
+    private RandomAccessFile fFileInput;
+
+    @Override
+    public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
+        super.initTrace(resource, path, type);
+        try {
+            fFile = new File(path);
+            fFileInput = new BufferedRandomAccessFile(fFile, "r"); //$NON-NLS-1$
+        } catch (IOException e) {
+            throw new TmfTraceException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public synchronized void dispose() {
+        if (fFileInput != null) {
+            try {
+                fFileInput.close();
+            } catch (IOException e) {
+                Activator.getInstance().logError("Error disposing trace. File: " + getPath(), e); //$NON-NLS-1$
+            }
+        }
+        super.dispose();
+    }
 
     @Override
     public IStatus validate(IProject project, String path) {

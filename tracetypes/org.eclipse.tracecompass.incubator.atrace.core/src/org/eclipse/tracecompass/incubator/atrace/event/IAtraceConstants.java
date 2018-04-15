@@ -12,10 +12,9 @@ package org.eclipse.tracecompass.incubator.atrace.event;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.tracecompass.incubator.internal.ftrace.core.layout.GenericFtraceEventLayout;
 
 /**
- * Constants for the ftrace format
+ * Constants for the atrace format
  *
  * @author Guillaume Champagne
  * @author Alexis-Maurer Fortin
@@ -25,10 +24,6 @@ import org.eclipse.tracecompass.incubator.internal.ftrace.core.layout.GenericFtr
  */
 @NonNullByDefault
 public interface IAtraceConstants {
-
-    String DEFAULT_SYSTRACE_PROCESS_DUMP_EVENT_NAME = GenericFtraceEventLayout.getInstance().eventStatedumpProcessState();
-
-    String DEFAULT_SYSTRACE_PROCESS_DUMP_EVENT_TYPE = "atrace_process_dump_event"; //$NON-NLS-1$
 
     Pattern PROCESS_DUMP_PATTERN = Pattern
             .compile("^\\s*(?<user>.*?)\\s+(?<pid>\\d+)\\s+(?<ppid>\\d+)\\s+(?<vsz>\\d+)\\s+(?<rss>\\d+)\\s+(?<wchan>.*?)\\s+(?<pc>.*?)\\s+(?<s>.*?)\\s+(?<name>.*?)?"); //$NON-NLS-1$
