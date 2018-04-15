@@ -213,7 +213,10 @@ public class ATrace extends GenericFtrace {
                             fFileInput.seek(locationInfo);
                         }
                         String nextLine = fFileInput.readLine();
-
+                        //TODO: Check here if matches the following. If it does, skip line.
+                        // - USER PID PPID ..
+                        // - html tags   </script> <script class="trace-data" type="application/text">
+                        // - Starts with #
                         SystraceProcessDumpEventField field = SystraceProcessDumpEventField.parseLine(nextLine);
                         if (field != null) {
                             event = new SystraceProcessDumpEvent(this, context.getRank(), TmfTimestamp.fromNanos(first_timestamp), field);
@@ -227,13 +230,6 @@ public class ATrace extends GenericFtrace {
             }
             return event;
      }
-
-   /* private void updateTimestamps() {
-        // TODO Auto-generated method stub
-        for (SystraceProcessDumpEvent e: processDumpEvents) {
-            e.setTimestamp(TmfTimestamp.fromNanos(first_timestamp));
-        }
-    }*/
 
     @Override
     protected @Nullable GenericFtraceField parseLine(String line) {
