@@ -3,6 +3,7 @@ package org.eclipse.tracecompass.incubator.atrace.event;
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.GenericFtraceEventTypeFactory;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
@@ -55,9 +56,9 @@ public class SystraceProcessDumpEvent extends PlatformObject implements ITmfEven
         } else {
             fTimestamp = TmfTimestamp.ZERO;
         }
-        fType = null; //TODO: check if OK
+        fType = GenericFtraceEventTypeFactory.get(field.getName());
         fContent = field;
-        fName = ISystraceProcessDumpConstants.DEFAULT_SYSTRACE_PROCESS_DUMP_EVENT_NAME;
+        fName = IAtraceConstants.DEFAULT_SYSTRACE_PROCESS_DUMP_EVENT_NAME;
         fCallsite = null;
     }
     /**

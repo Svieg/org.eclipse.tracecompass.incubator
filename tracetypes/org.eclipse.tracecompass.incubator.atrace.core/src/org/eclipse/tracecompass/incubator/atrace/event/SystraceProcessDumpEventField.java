@@ -65,22 +65,20 @@ public class SystraceProcessDumpEventField extends TmfEventField {
         if (line == null) {
             return null;
         }
-        Matcher matcher = ISystraceProcessDumpConstants.PROCESS_DUMP_PATTERN.matcher(line);
+        Matcher matcher = IAtraceConstants.PROCESS_DUMP_PATTERN.matcher(line);
         if (matcher.matches()) {
-            String fName = matcher.group("name"); //$NON-NLS-1$
+            String fProcessName = matcher.group("name"); //$NON-NLS-1$
             Integer fPid = Integer.parseInt(matcher.group("pid")); //$NON-NLS-1$
             Integer fPpid = Integer.parseInt(matcher.group("ppid")); //$NON-NLS-1$
 
             Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
-            fields.put("name", fName); //$NON-NLS-1$
+            fields.put("name", fProcessName); //$NON-NLS-1$
             fields.put("pid", (long) fPid); //$NON-NLS-1$
             fields.put("ppid", (long) fPpid); //$NON-NLS-1$
-
-            //TODO: Need to set a value for TID and status
             fields.put("tid", (long) fPid); //$NON-NLS-1$
             fields.put("status", (long) 2); //$NON-NLS-1$
 
-            return new SystraceProcessDumpEventField(fName, fPid, fPpid, fields);
+            return new SystraceProcessDumpEventField(IAtraceConstants.DEFAULT_SYSTRACE_PROCESS_DUMP_EVENT_NAME, fPid, fPpid, fields);
         }
         return null;
     }

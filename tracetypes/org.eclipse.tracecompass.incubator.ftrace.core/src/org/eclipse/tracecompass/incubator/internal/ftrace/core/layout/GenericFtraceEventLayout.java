@@ -29,7 +29,7 @@ public class GenericFtraceEventLayout extends DefaultEventLayout {
     private static final @NonNull String PREV_PID = "prev_pid"; //$NON-NLS-1$
     private static final @NonNull String CHILD_TID = "child_pid"; //$NON-NLS-1$
     private static final @NonNull String TID = "pid"; //$NON-NLS-1$
-    private static final String STATEDUMP_PROCESS_STATE = "state_dump_ftrace_test"; //$NON-NLS-1$
+    private static final String STATEDUMP_PROCESS_STATE = "atrace_process_dump"; //$NON-NLS-1$
 
     private static @Nullable GenericFtraceEventLayout INSTANCE;
 
