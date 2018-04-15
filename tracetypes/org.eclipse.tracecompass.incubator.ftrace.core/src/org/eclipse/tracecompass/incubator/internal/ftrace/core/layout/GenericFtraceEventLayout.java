@@ -12,6 +12,7 @@ package org.eclipse.tracecompass.incubator.internal.ftrace.core.layout;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.DefaultEventLayout;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.IGenericFtraceConstants;
 
 /**
  * Event and field definitions for ftrace traces.
@@ -29,6 +30,8 @@ public class GenericFtraceEventLayout extends DefaultEventLayout {
     private static final @NonNull String PREV_PID = "prev_pid"; //$NON-NLS-1$
     private static final @NonNull String CHILD_TID = "child_pid"; //$NON-NLS-1$
     private static final @NonNull String TID = "pid"; //$NON-NLS-1$
+    private static final String STATEDUMP_PROCESS_STATE = IGenericFtraceConstants.PROCESS_DUMP_EVENT_NAME;
+
     private static @Nullable GenericFtraceEventLayout INSTANCE;
 
     /**
@@ -72,4 +75,10 @@ public class GenericFtraceEventLayout extends DefaultEventLayout {
     public String fieldChildTid() {
         return CHILD_TID;
     }
+
+    @Override
+    public @NonNull String eventStatedumpProcessState() {
+        return STATEDUMP_PROCESS_STATE;
+    }
+
 }

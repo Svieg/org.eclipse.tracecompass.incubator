@@ -10,25 +10,37 @@
 package org.eclipse.tracecompass.incubator.internal.atrace.trace;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.atrace.event.IAtraceConstants;
+import org.eclipse.tracecompass.incubator.atrace.event.SystraceProcessDumpEvent;
+import org.eclipse.tracecompass.incubator.atrace.event.SystraceProcessDumpEventField;
 import org.eclipse.tracecompass.incubator.internal.atrace.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.GenericFtraceField;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.IGenericFtraceConstants;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.GenericFtrace;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
+import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
+import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Traces gathered via atrace.
@@ -43,12 +55,42 @@ public class ATrace extends GenericFtrace {
 
     private static final String ATRACE_TRACEEVENT_EVENT = "tracing_mark_write"; //$NON-NLS-1$
 
-    private static final Pattern TRACE_EVENT_PATTERN = Pattern.compile("(?<phase>\\w)(\\|(?<tid>\\d+)\\|(?<content>[^\\|]+))?"); //$NON-NLS-1$
     private static final String TRACE_EVENT_PHASE_GROUP = "phase"; //$NON-NLS-1$
     private static final String TRACE_EVENT_CONTENT_GROUP = "content"; //$NON-NLS-1$
 
     private static final int MAX_LINES = 100;
     private static final int MAX_CONFIDENCE = 100;
+
+    private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
+    private static final TmfContext INVALID_CONTEXT = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
+
+    private long startingTimestamp;
+
+    private File fFile;
+    private RandomAccessFile fFileInput;
+
+    @Override
+    public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
+        super.initTrace(resource, path, type);
+        try {
+            fFile = new File(path);
+            fFileInput = new BufferedRandomAccessFile(fFile, "r"); //$NON-NLS-1$
+        } catch (IOException e) {
+            throw new TmfTraceException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public synchronized void dispose() {
+        if (fFileInput != null) {
+            try {
+                fFileInput.close();
+            } catch (IOException e) {
+                Activator.getInstance().logError("Error disposing trace. File: " + getPath(), e); //$NON-NLS-1$
+            }
+        }
+        super.dispose();
+    }
 
     @Override
     public IStatus validate(IProject project, String path) {
@@ -117,6 +159,101 @@ public class ATrace extends GenericFtrace {
     }
 
     @Override
+    public ITmfContext seekEvent(ITmfLocation location) {
+        if (fFile == null) {
+            return INVALID_CONTEXT;
+        }
+        final TmfContext context = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
+        if (NULL_LOCATION.equals(location)) {
+            return context;
+        }
+        try {
+            if (location == null) {
+                fFileInput.seek(0);
+                long lineStartOffset = fFileInput.getFilePointer();
+                String line = fFileInput.readLine();
+
+                //Look for process dump matches
+                Matcher processDumpMatcher = IAtraceConstants.PROCESS_DUMP_PATTERN.matcher(line);
+                Matcher atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
+
+                while (!atraceMatcher.matches() && !processDumpMatcher.matches()) {
+                    lineStartOffset = fFileInput.getFilePointer();
+                    line = fFileInput.readLine();
+                    atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
+                    processDumpMatcher = IAtraceConstants.PROCESS_DUMP_PATTERN.matcher(line);
+                }
+                if (processDumpMatcher.matches()) {
+                    //Look for the first atrace event to extract timestamp
+                    while (!atraceMatcher.matches()) {
+                        line = fFileInput.readLine();
+                        atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
+                    }
+                    GenericFtraceField field = GenericFtraceField.parseLine(line);
+                    if (field!=null) {
+                        startingTimestamp = field.getTs();
+                    }
+                }
+
+                fFileInput.seek(lineStartOffset);
+            } else if (location.getLocationInfo() instanceof Long) {
+                fFileInput.seek((Long) location.getLocationInfo());
+            }
+            context.setLocation(new TmfLongLocation(fFileInput.getFilePointer()));
+            context.setRank(0);
+            return context;
+        } catch (final java.lang.NullPointerException e) {
+            Activator.getInstance().logError("Error seeking event. Null Pointer Exception: " + getPath(), e); //$NON-NLS-1$
+            return context;
+        } catch (final FileNotFoundException e) {
+            Activator.getInstance().logError("Error seeking event. File not found: " + getPath(), e); //$NON-NLS-1$
+            return context;
+        } catch (final IOException e) {
+            Activator.getInstance().logError("Error seeking event. File: " + getPath(), e); //$NON-NLS-1$
+            return context;
+        }
+
+    }
+
+    @Override
+    public ITmfEvent parseEvent(ITmfContext context) {
+        ITmfEvent event = super.parseEvent(context);
+        if (event != null)
+        {
+            return event;
+        }
+        //We might be in the process dump generated by systrace
+        ITmfLocation location = context.getLocation();
+        if (location instanceof TmfLongLocation) {
+            TmfLongLocation tmfLongLocation = (TmfLongLocation) location;
+            Long locationInfo = tmfLongLocation.getLocationInfo();
+            if (location.equals(NULL_LOCATION)) {
+                locationInfo = 0L;
+            }
+            super.parseEvent(context);
+            if (locationInfo != null) {
+                try {
+                    if (!locationInfo.equals(fFileInput.getFilePointer())) {
+                        fFileInput.seek(locationInfo);
+                    }
+                    String nextLine = fFileInput.readLine();
+                    //TODO: Check here if matches the following. If it does, skip line.
+                    // - USER PID PPID ..
+                    // - html tags   </script> <script class="trace-data" type="application/text">
+                    // - Starts with #
+                    SystraceProcessDumpEventField field = SystraceProcessDumpEventField.parseLine(nextLine);
+                    if (field != null) {
+                        return new SystraceProcessDumpEvent(this, context.getRank(), TmfTimestamp.fromNanos(startingTimestamp), field);
+                    }
+                } catch (IOException e) {
+                    Activator.getInstance().logError("Error parsing event", e); //$NON-NLS-1$
+                }
+            }
+        }
+        return event;
+    }
+
+    @Override
     protected @Nullable GenericFtraceField parseLine(String line) {
         if (line == null || line.isEmpty()) {
             return null;
@@ -136,7 +273,7 @@ public class ATrace extends GenericFtrace {
                  */
                 if (field.getName().equals(ATRACE_TRACEEVENT_EVENT)) {
                     String data = matcher.group(IGenericFtraceConstants.FTRACE_DATA_GROUP);
-                    Matcher atraceMatcher = TRACE_EVENT_PATTERN.matcher(data);
+                    Matcher atraceMatcher = IAtraceConstants.TRACE_EVENT_PATTERN.matcher(data);
                     if (atraceMatcher.matches()) {
                         String phase = atraceMatcher.group(TRACE_EVENT_PHASE_GROUP);
                         String pname = matcher.group(IGenericFtraceConstants.FTRACE_COMM_GROUP);
