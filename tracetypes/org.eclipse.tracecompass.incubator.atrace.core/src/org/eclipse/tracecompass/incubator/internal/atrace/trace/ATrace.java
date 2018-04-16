@@ -234,20 +234,30 @@ public class ATrace extends GenericFtrace {
                     if (!locationInfo.equals(fFileInput.getFilePointer())) {
                         fFileInput.seek(locationInfo);
                     }
-                    String nextLine;
-                    Matcher matcher;
-                    do {
-                        nextLine = fFileInput.readLine();
-                        if (nextLine != null) {
-                            matcher = IAtraceConstants.PROCESS_DUMP_PATTERN.matcher(nextLine);
-                        } else {
-                            matcher = IAtraceConstants.PROCESS_DUMP_PATTERN.matcher(""); //$NON-NLS-1$
-                        }
-                    } while (nextLine != null && !matcher.matches());
+                    String nextLine = fFileInput.readLine();
+                    Matcher processDumpMatcher = IAtraceConstants.PROCESS_DUMP_PATTERN.matcher(nextLine);
+                    Matcher atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(nextLine);
 
-                    SystraceProcessDumpEventField field = SystraceProcessDumpEventField.parseLine(nextLine);
-                    if (field != null) {
-                        return new SystraceProcessDumpEvent(this, context.getRank(), TmfTimestamp.fromNanos(startingTimestamp), field);
+                    while (nextLine != null && !processDumpMatcher.matches() && !atraceMatcher.matches()) {
+                        nextLine = fFileInput.readLine();
+                        if (nextLine == null) {
+                            break;
+                        }
+                        atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(nextLine);
+                        processDumpMatcher = IAtraceConstants.PROCESS_DUMP_PATTERN.matcher(nextLine);
+                    }
+
+                    if (processDumpMatcher.matches()) {
+                        SystraceProcessDumpEventField field = SystraceProcessDumpEventField.parseLine(nextLine);
+                        if (field != null) {
+                            return new SystraceProcessDumpEvent(this, context.getRank(), TmfTimestamp.fromNanos(startingTimestamp), field);
+                        }
+                    }
+                    else {
+                        event = super.parseEvent(context);
+                        if (event != null) {
+                            return event;
+                        }
                     }
                 } catch (IOException e) {
                     Activator.getInstance().logError("Error parsing event", e); //$NON-NLS-1$
